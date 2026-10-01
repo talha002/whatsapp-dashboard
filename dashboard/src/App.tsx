@@ -28,6 +28,7 @@ import { ResponseTimeChart } from './components/ResponseTimeChart'
 import { WordCooccurrenceNetwork } from './components/WordCooccurrenceNetwork'
 import { TabNav, type AppTab } from './components/TabNav'
 import { WelcomePanel } from './components/WelcomePanel'
+import { LoadErrorCard } from './components/LoadErrorCard'
 import { DocumentsSection } from './components/DocumentsSection'
 import { WordListsSection } from './components/WordListsSection'
 import { getDashboardStopwordSet, useWordListVersion } from './lib/wordlists'
@@ -190,15 +191,7 @@ export default function App() {
       {activeTab === 'documents' && <DocumentsSection selectedId={selectedDocId} onSelect={setSelectedDocId} />}
       {activeTab === 'wordlists' && <WordListsSection />}
 
-      {error && !chatData && (
-        <main className="status-page">
-          <section className="card status-card">
-            <h1>{t('status.loadErrorTitle')}</h1>
-            <p>{error}</p>
-            <p>{t('status.loadErrorHint')}</p>
-          </section>
-        </main>
-      )}
+      {error && !chatData && <LoadErrorCard error={error} onGoToDocuments={() => setActiveTab('documents')} />}
 
       {activeTab === 'dashboard' && !error && !loaded && !chatData && (
         <main className="status-page">
@@ -210,7 +203,7 @@ export default function App() {
       )}
 
       {activeTab === 'dashboard' && !error && loaded && !chatData && (
-        <WelcomePanel onUploadClick={() => setActiveTab('documents')} />
+        <WelcomePanel onNavigate={setActiveTab} />
       )}
 
       {activeTab === 'dashboard' && chatData && (

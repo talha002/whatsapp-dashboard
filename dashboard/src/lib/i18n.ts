@@ -12,6 +12,9 @@ const en = {
   'tabs.dashboard': 'Dashboard',
   'tabs.documents': 'Documents',
   'tabs.wordlists': 'Word Lists',
+  'tabs.dashboardHint': 'Charts and stats for loaded chats',
+  'tabs.documentsHint': 'Upload and manage chats',
+  'tabs.wordlistsHint': 'Customize stop/ban words',
 
   'app.eyebrow': 'WhatsApp chat analytics',
   'app.tagline': 'Chat analytics & text analysis platform',
@@ -23,6 +26,7 @@ const en = {
 
   'status.loadErrorTitle': 'Dashboard data could not be loaded',
   'status.loadErrorHint': 'You can still upload and analyze text documents from the Documents tab.',
+  'status.loadErrorAction': 'Go to Documents',
   'status.loadingTitle': 'Loading chat analytics…',
   'status.loadingBody': 'Reading dashboard data.',
   'onboarding.title': 'Welcome to WhatsApp chat analytics',
@@ -179,6 +183,9 @@ const tr: Record<keyof typeof en, string> = {
   'tabs.dashboard': 'Pano',
   'tabs.documents': 'Belgeler',
   'tabs.wordlists': 'Kelime Listeleri',
+  'tabs.dashboardHint': 'Yüklü sohbetler için grafikler',
+  'tabs.documentsHint': 'Sohbet yükle ve yönet',
+  'tabs.wordlistsHint': 'Stop/yasak kelimeleri özelleştir',
 
   'app.eyebrow': 'WhatsApp sohbet analitiği',
   'app.tagline': 'Sohbet analitiği ve metin analizi platformu',
@@ -190,6 +197,7 @@ const tr: Record<keyof typeof en, string> = {
 
   'status.loadErrorTitle': 'Pano verileri yüklenemedi',
   'status.loadErrorHint': 'Belgeler sekmesinden metin belgeleri yükleyip analiz etmeye devam edebilirsiniz.',
+  'status.loadErrorAction': 'Belgeler’e git',
   'status.loadingTitle': 'Sohbet analitiği yükleniyor…',
   'status.loadingBody': 'Pano verileri okunuyor.',
   'onboarding.title': 'WhatsApp sohbet analitiğine hoş geldiniz',
@@ -402,7 +410,7 @@ export function subscribeLocale(listener: () => void) {
 }
 
 export function useLocale(): Locale {
-  return useSyncExternalStore(subscribeLocale, getLocale)
+  return useSyncExternalStore(subscribeLocale, getLocale, getLocale)
 }
 
 export function useT() {

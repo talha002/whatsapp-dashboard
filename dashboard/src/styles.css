@@ -489,6 +489,21 @@ select:disabled {
   background: #2563eb;
 }
 
+.welcome-tab-link {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+}
+
+.welcome-tab-link:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
 .welcome-actions {
   display: flex;
   gap: 10px;
@@ -534,13 +549,27 @@ code {
   background: transparent;
   color: #a8b7cb;
   cursor: pointer;
-  padding: 9px 18px;
+  padding: 7px 18px;
   font-weight: 700;
+  display: grid;
+  gap: 1px;
+  justify-items: center;
+  line-height: 1.25;
+}
+
+.tab-hint {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8294ad;
 }
 
 .tab-nav button.active {
   background: #2563eb;
   color: white;
+}
+
+.tab-nav button.active .tab-hint {
+  color: rgba(219, 234, 254, 0.85);
 }
 
 .form-grid {
