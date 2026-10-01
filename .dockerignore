@@ -1,0 +1,6 @@
+.git
+dashboard/node_modules
+dashboard/dist
+dashboard/.env
+dashboard/public/chat-data.json
+**/npm-debug.log*

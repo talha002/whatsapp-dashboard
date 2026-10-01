@@ -1,0 +1,15 @@
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: whatsapp-dashboard:latest
+    container_name: whatsapp-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-8080}:8080"
+    environment:
+      PORT: 8080
+      STATIC_DIR: /app/dist
+      VITE_APP_TITLE: whatsapp-dashboard
+      VITE_DATA_URL: /chat-data.json
+    restart: unless-stopped
