@@ -1,5 +1,6 @@
 import type { HeatmapData } from '../lib/analysis'
 import { categoryAxisTheme, chartMutedText, chartText, tooltipTheme } from '../lib/chartTheme'
+import { useT } from '../lib/i18n'
 import { EChart } from './EChart'
 import { EmptyState } from './EmptyState'
 
@@ -8,6 +9,7 @@ interface ActivityHeatmapChartProps {
 }
 
 export function ActivityHeatmapChart({ data }: ActivityHeatmapChartProps) {
+  const t = useT()
   if (data.values.length === 0) return <EmptyState />
 
   return (
@@ -20,7 +22,7 @@ export function ActivityHeatmapChart({ data }: ActivityHeatmapChartProps) {
           position: 'top',
           formatter: (params: any) => {
             const value = params.value as [number, number, number]
-            return `${data.weekdays[value[1]]} ${data.hours[value[0]]}<br/>${value[2]} messages`
+            return `${data.weekdays[value[1]]} ${data.hours[value[0]]}<br/>${t('heatmap.messages', { count: value[2] })}`
           }
         },
         grid: { left: 56, right: 20, top: 24, bottom: 72 },
@@ -47,7 +49,7 @@ export function ActivityHeatmapChart({ data }: ActivityHeatmapChartProps) {
         },
         series: [
           {
-            name: 'Messages',
+            name: t('heatmap.series'),
             type: 'heatmap',
             data: data.values,
             label: { show: false },

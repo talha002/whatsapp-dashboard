@@ -1,9 +1,8 @@
 import type { ActivityMetric, CategorySeries } from '../types'
 import { categoryAxisTheme, CHART_COLORS, chartText, dataZoomTheme, legendTheme, tooltipTheme, valueAxisTheme } from '../lib/chartTheme'
+import { getNumberFormatter, useLocale, useT } from '../lib/i18n'
 import { EChart } from './EChart'
 import { EmptyState } from './EmptyState'
-
-const numberFormatter = new Intl.NumberFormat('en')
 
 interface ActivityLineChartProps {
   data: CategorySeries
@@ -12,18 +11,21 @@ interface ActivityLineChartProps {
 }
 
 export function ActivityLineChart({ data, metric, onMetricChange }: ActivityLineChartProps) {
+  const locale = useLocale()
+  const t = useT()
+  const numberFormatter = getNumberFormatter(locale)
   const hasValues = data.series.some((entry) => entry.data.some((value) => value > 0))
   if (data.categories.length === 0 || !hasValues) return <EmptyState />
 
   return (
     <div className="chart-with-toolbar">
       <div className="chart-toolbar split">
-        <div className="segmented" role="group" aria-label="Activity metric">
+        <div className="segmented" role="group" aria-label={t('activity.metricAria')}>
           <button className={metric === 'messages' ? 'active' : ''} onClick={() => onMetricChange('messages')}>
-            Messages
+            {t('activity.messages')}
           </button>
           <button className={metric === 'words' ? 'active' : ''} onClick={() => onMetricChange('words')}>
-            Words
+            {t('activity.words')}
           </button>
         </div>
       </div>
@@ -46,7 +48,7 @@ export function ActivityLineChart({ data, metric, onMetricChange }: ActivityLine
             ...categoryAxisTheme,
             axisLabel: { ...categoryAxisTheme.axisLabel, hideOverlap: true }
           },
-          yAxis: { type: 'value', name: metric === 'words' ? 'Words' : 'Messages', ...valueAxisTheme },
+          yAxis: { type: 'value', name: metric === 'words' ? t('activity.words') : t('activity.messages'), ...valueAxisTheme },
           dataZoom:
             data.categories.length > 40
               ? [

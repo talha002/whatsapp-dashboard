@@ -1,4 +1,5 @@
 import type { CategorySeries, TokenizedMessage } from '../types'
+import { getMonthFormatter, getWeekdayLabels, type Locale } from './i18n'
 
 export interface HeatmapData {
   weekdays: string[]
@@ -33,8 +34,6 @@ export interface ParticipantStyle {
   placeholderRatio: number
 }
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const monthFormatter = new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' })
 const QUESTION_RE = /\?/
 const LINK_RE = /(https?:\/\/|www\.)/i
 const EMOJI_RE = /\p{Extended_Pictographic}/gu
@@ -44,12 +43,12 @@ function monthKey(timestamp: number) {
   return `${String(date.getUTCFullYear()).padStart(4, '0')}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
-function monthLabel(key: string) {
+function monthLabel(key: string, locale: Locale) {
   const [year, month] = key.split('-').map(Number)
   const date = new Date(0)
   date.setUTCFullYear(year, month - 1, 1)
   date.setUTCHours(0, 0, 0, 0)
-  return monthFormatter.format(date)
+  return getMonthFormatter(locale).format(date)
 }
 
 function median(values: number[]) {
@@ -59,7 +58,7 @@ function median(values: number[]) {
   return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle]
 }
 
-export function activityHeatmap(messages: TokenizedMessage[]): HeatmapData {
+export function activityHeatmap(messages: TokenizedMessage[], locale: Locale = 'en'): HeatmapData {
   const counts = Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => 0))
 
   for (const message of messages) {
@@ -79,14 +78,14 @@ export function activityHeatmap(messages: TokenizedMessage[]): HeatmapData {
   }
 
   return {
-    weekdays: WEEKDAYS,
+    weekdays: getWeekdayLabels(locale),
     hours: Array.from({ length: 24 }, (_, hour) => `${hour}:00`),
     values,
     max
   }
 }
 
-export function conversationSessions(messages: TokenizedMessage[], gapMinutes = 180): SessionAnalysis {
+export function conversationSessions(messages: TokenizedMessage[], gapMinutes = 180, locale: Locale = 'en'): SessionAnalysis {
   const sorted = [...messages].sort((a, b) => a.timestamp - b.timestamp)
   const gapMs = gapMinutes * 60_000
   const starters = new Map<string, number>()
@@ -122,7 +121,7 @@ export function conversationSessions(messages: TokenizedMessage[], gapMinutes = 
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name, 'tr')),
     byMonth: {
-      categories: monthlyEntries.map(([key]) => monthLabel(key)),
+      categories: monthlyEntries.map(([key]) => monthLabel(key, locale)),
       series: [{ name: 'Sessions', data: monthlyEntries.map(([, value]) => value) }]
     }
   }
@@ -144,14 +143,18 @@ function padHour(hour: number) {
   return `${String(hour).padStart(2, '0')}:00`
 }
 
-function responseCategory(message: TokenizedMessage, dimension: ResponseDimension) {
+function responseCategory(message: TokenizedMessage, dimension: ResponseDimension, locale: Locale) {
   if (dimension === 'person') return message.sender
-  if (dimension === 'weekday') return WEEKDAYS[(new Date(message.timestamp).getUTCDay() + 6) % 7]
+  if (dimension === 'weekday') return getWeekdayLabels(locale)[(new Date(message.timestamp).getUTCDay() + 6) % 7]
   if (dimension === 'hour') return padHour(message.hour)
   return String(message.year)
 }
 
-export function responseTimeAnalysis(messages: TokenizedMessage[], dimension: ResponseDimension): ResponseTimeResult {
+export function responseTimeAnalysis(
+  messages: TokenizedMessage[],
+  dimension: ResponseDimension,
+  locale: Locale = 'en'
+): ResponseTimeResult {
   const sorted = [...messages].sort((a, b) => a.timestamp - b.timestamp)
   const buckets = new Map<string, number[]>()
   let totalResponses = 0
@@ -164,7 +167,7 @@ export function responseTimeAnalysis(messages: TokenizedMessage[], dimension: Re
     const gapMinutes = (current.timestamp - previous.timestamp) / 60_000
     if (gapMinutes <= 0 || gapMinutes > RESPONSE_THRESHOLD_MINUTES) continue
 
-    const category = responseCategory(current, dimension)
+    const category = responseCategory(current, dimension, locale)
     let bucket = buckets.get(category)
     if (!bucket) {
       bucket = []
@@ -176,7 +179,7 @@ export function responseTimeAnalysis(messages: TokenizedMessage[], dimension: Re
 
   let categories: string[]
   if (dimension === 'weekday') {
-    categories = WEEKDAYS
+    categories = getWeekdayLabels(locale)
   } else if (dimension === 'hour') {
     categories = Array.from({ length: 24 }, (_, hour) => padHour(hour))
   } else if (dimension === 'person') {

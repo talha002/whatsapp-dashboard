@@ -1,5 +1,6 @@
 import type { CooccurrenceNetwork } from '../lib/cooccurrence'
 import { CHART_COLORS, chartMutedText, chartText, tooltipTheme } from '../lib/chartTheme'
+import { getNumberFormatter, useLocale, useT } from '../lib/i18n'
 import { escapeHtml } from '../../shared/text.js'
 import { EChart } from './EChart'
 import { EmptyState } from './EmptyState'
@@ -9,8 +10,10 @@ interface WordCooccurrenceNetworkProps {
 }
 
 export function WordCooccurrenceNetwork({ network }: WordCooccurrenceNetworkProps) {
+  const locale = useLocale()
+  const t = useT()
   if (network.nodes.length === 0 || network.links.length === 0) {
-    return <EmptyState message="No word co-occurrence network for the current filters." />
+    return <EmptyState message={t('network.empty')} />
   }
 
   const nodes = network.nodes.map((node, index) => ({
@@ -28,7 +31,7 @@ export function WordCooccurrenceNetwork({ network }: WordCooccurrenceNetworkProp
     <div className="chart-with-toolbar">
       <div className="chart-toolbar split">
         <span style={{ color: chartMutedText }}>
-          {network.nodes.length} nodes • {network.links.length} edges • window ≤ 2 tokens • min edge count 2
+          {t('network.stats', { nodes: network.nodes.length, edges: network.links.length })}
         </span>
       </div>
       <EChart
@@ -40,10 +43,10 @@ export function WordCooccurrenceNetwork({ network }: WordCooccurrenceNetworkProp
             formatter: (params: any) => {
               if (params.dataType === 'edge') {
                 const data = params.data as { source: string; target: string; value: number }
-                return `${escapeHtml(data.source)} ↔ ${escapeHtml(data.target)}<br/>Co-occurrences: ${data.value.toLocaleString('en')}`
+                return `${escapeHtml(data.source)} ↔ ${escapeHtml(data.target)}<br/>${t('network.cooccurrences')}: ${getNumberFormatter(locale).format(data.value)}`
               }
               const data = params.data as { name: string; value: number }
-              return `<strong>${escapeHtml(data.name)}</strong><br/>Frequency: ${data.value.toLocaleString('en')}`
+              return `<strong>${escapeHtml(data.name)}</strong><br/>${t('network.frequency')}: ${getNumberFormatter(locale).format(data.value)}`
             }
           },
           series: [

@@ -3,6 +3,7 @@ import type { TokenizedMessage } from '../types'
 import type { ResponseDimension } from '../lib/analysis'
 import { responseTimeAnalysis } from '../lib/analysis'
 import { categoryAxisTheme, CHART_COLORS, chartText, dataZoomTheme, legendTheme, tooltipTheme, valueAxisTheme } from '../lib/chartTheme'
+import { getNumberFormatter, useLocale, useT } from '../lib/i18n'
 import { escapeHtml } from '../../shared/text.js'
 import { EChart } from './EChart'
 import { EmptyState } from './EmptyState'
@@ -21,25 +22,27 @@ function formatMinutes(minutes: number) {
 }
 
 export function ResponseTimeChart({ messages }: ResponseTimeChartProps) {
+  const locale = useLocale()
+  const t = useT()
   const [dimension, setDimension] = useState<ResponseDimension>('person')
-  const result = useMemo(() => responseTimeAnalysis(messages, dimension), [messages, dimension])
+  const result = useMemo(() => responseTimeAnalysis(messages, dimension, locale), [messages, dimension, locale])
 
   return (
     <div className="chart-with-toolbar">
       <div className="chart-toolbar split">
-        <span>Replies after sender change, capped at 12h</span>
+        <span>{t('response.caption')}</span>
         <label>
-          <span>Group by</span>
+          <span>{t('response.groupBy')}</span>
           <select value={dimension} onChange={(event) => setDimension(event.target.value as ResponseDimension)}>
-            <option value="person">Person</option>
-            <option value="weekday">Weekday</option>
-            <option value="hour">Hour</option>
-            <option value="year">Year</option>
+            <option value="person">{t('response.person')}</option>
+            <option value="weekday">{t('response.weekday')}</option>
+            <option value="hour">{t('response.hour')}</option>
+            <option value="year">{t('response.year')}</option>
           </select>
         </label>
       </div>
       {result.totalResponses === 0 ? (
-        <EmptyState message="No response gaps for the current filters." />
+        <EmptyState message={t('response.empty')} />
       ) : (
         <EChart
           height={340}
@@ -56,7 +59,7 @@ export function ResponseTimeChart({ messages }: ResponseTimeChartProps) {
                 const name = first?.name ?? result.categories[index]
                 const median = result.values[index] || 0
                 const count = result.counts[index] || 0
-                return `<strong>${escapeHtml(name)}</strong><br/>Median response: ${formatMinutes(median)}<br/>Responses: ${count.toLocaleString('en')}`
+                return `<strong>${escapeHtml(name)}</strong><br/>${t('response.medianResponse')}: ${formatMinutes(median)}<br/>${t('response.responses')}: ${getNumberFormatter(locale).format(count)}`
               }
             },
             legend: { show: false },
@@ -73,7 +76,7 @@ export function ResponseTimeChart({ messages }: ResponseTimeChartProps) {
             },
             yAxis: {
               type: 'value',
-              name: 'Median response',
+              name: t('response.yAxis'),
               ...valueAxisTheme,
               axisLabel: { ...valueAxisTheme.axisLabel, formatter: (value: number) => formatMinutes(value) }
             },
@@ -86,7 +89,7 @@ export function ResponseTimeChart({ messages }: ResponseTimeChartProps) {
                 : undefined,
             series: [
               {
-                name: 'Median response time',
+                name: t('response.series'),
                 type: 'bar',
                 data: result.values,
                 barMaxWidth: 44,

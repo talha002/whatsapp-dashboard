@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { Filters, TokenizedMessage } from '../types'
-import { ALL_MONTHS, ALL_SENDERS, ALL_YEARS, MONTH_FULL_LABELS, getMonthCounts } from '../lib/stats'
+import { ALL_MONTHS, ALL_SENDERS, ALL_YEARS, getMonthCounts } from '../lib/stats'
+import { getMonthFullLabels, useLocale, useT } from '../lib/i18n'
 
 export interface ParticipantOption {
   name: string
@@ -16,6 +17,9 @@ interface ChartFiltersProps {
 }
 
 export function ChartFilters({ messages, years, participants, filters, onChange }: ChartFiltersProps) {
+  const locale = useLocale()
+  const t = useT()
+  const monthLabels = getMonthFullLabels(locale)
   const senderScopedMessages = useMemo(
     () => (filters.sender === ALL_SENDERS ? messages : messages.filter((message) => message.sender === filters.sender)),
     [messages, filters.sender]
@@ -23,9 +27,9 @@ export function ChartFilters({ messages, years, participants, filters, onChange 
   const monthCounts = useMemo(() => getMonthCounts(senderScopedMessages, filters.year), [senderScopedMessages, filters.year])
 
   return (
-    <div className="chart-filters" aria-label="Chart filters">
+    <div className="chart-filters" aria-label={t('filters.aria')}>
       <label className="filter-field">
-        <span>Year</span>
+        <span>{t('filters.year')}</span>
         <select
           value={String(filters.year)}
           onChange={(event) => {
@@ -33,7 +37,7 @@ export function ChartFilters({ messages, years, participants, filters, onChange 
             onChange({ ...filters, year, month: ALL_MONTHS })
           }}
         >
-          <option value={ALL_YEARS}>All years</option>
+          <option value={ALL_YEARS}>{t('filters.allYears')}</option>
           {years.map((year) => (
             <option key={year} value={year}>
               {year}
@@ -43,7 +47,7 @@ export function ChartFilters({ messages, years, participants, filters, onChange 
       </label>
 
       <label className="filter-field">
-        <span>Month</span>
+        <span>{t('filters.month')}</span>
         <select
           value={String(filters.month)}
           disabled={filters.year === ALL_YEARS}
@@ -52,12 +56,12 @@ export function ChartFilters({ messages, years, participants, filters, onChange 
             onChange({ ...filters, month })
           }}
         >
-          <option value={ALL_MONTHS}>All months</option>
-          {MONTH_FULL_LABELS.map((label, index) => {
+          <option value={ALL_MONTHS}>{t('filters.allMonths')}</option>
+          {monthLabels.map((label, index) => {
             const count = monthCounts[index] || 0
             return (
               <option key={label} value={index + 1}>
-                {count > 0 ? `${label} (${count})` : `${label} (no data)`}
+                {count > 0 ? `${label} (${count})` : `${label} (${t('filters.noData')})`}
               </option>
             )
           })}
@@ -65,9 +69,9 @@ export function ChartFilters({ messages, years, participants, filters, onChange 
       </label>
 
       <label className="filter-field">
-        <span>Person</span>
+        <span>{t('filters.person')}</span>
         <select value={filters.sender} onChange={(event) => onChange({ ...filters, sender: event.target.value })}>
-          <option value={ALL_SENDERS}>All participants</option>
+          <option value={ALL_SENDERS}>{t('filters.allParticipants')}</option>
           {participants.map((participant) => (
             <option key={participant.name} value={participant.name}>
               {participant.name} ({participant.messages})

@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react'
+import { getLocale, translate } from '../lib/i18n'
 
 interface ErrorBoundaryState {
   message: string | null
@@ -24,21 +25,19 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
 
   render() {
     if (!this.state.message) return this.props.children
+    const locale = getLocale()
     return (
       <main className="status-page">
         <section className="card status-card">
-          <h1>Something went wrong</h1>
+          <h1>{translate(locale, 'errorBoundary.title')}</h1>
           <p>{this.state.message}</p>
-          <p>
-            A saved document may be causing this error. You can reload the page, or delete all saved documents and reload
-            (this cannot be undone).
-          </p>
+          <p>{translate(locale, 'errorBoundary.body')}</p>
           <div className="form-actions">
             <button type="button" onClick={() => window.location.reload()}>
-              Reload
+              {translate(locale, 'errorBoundary.reload')}
             </button>
             <button type="button" className="btn-primary" onClick={this.handleClearDocuments}>
-              Delete saved documents & reload
+              {translate(locale, 'errorBoundary.clearAndReload')}
             </button>
           </div>
         </section>

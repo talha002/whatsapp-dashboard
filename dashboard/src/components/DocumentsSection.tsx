@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
 import type { Language, StoredDocument } from '../types'
 import { deleteDocument, listDocuments, saveDocument } from '../lib/documents'
+import { getDateTimeFormatter, useLocale, useT } from '../lib/i18n'
 import { EmptyState } from './EmptyState'
 
-const dateFormatter = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' })
 const MAX_FILE_BYTES = 25 * 1024 * 1024
 
 interface DocumentsSectionProps {
@@ -12,6 +12,9 @@ interface DocumentsSectionProps {
 }
 
 export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps) {
+  const locale = useLocale()
+  const t = useT()
+  const dateFormatter = getDateTimeFormatter(locale)
   const [documents, setDocuments] = useState<StoredDocument[]>(() => listDocuments())
   const [title, setTitle] = useState('')
   const [language, setLanguage] = useState<Language>('tr')
@@ -22,7 +25,7 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
   const handleFile = async (file: File | undefined) => {
     if (!file) return
     if (file.size > MAX_FILE_BYTES) {
-      setError('The selected file is too large (25 MB maximum).')
+      setError(t('docs.errorTooLarge'))
       return
     }
     try {
@@ -32,18 +35,18 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
       setError(null)
       setTitle((current) => current || file.name.replace(/\.[^.]+$/, ''))
     } catch {
-      setError('The selected file could not be read.')
+      setError(t('docs.errorUnreadable'))
     }
   }
 
   const handleSave = () => {
     if (!content.trim()) {
-      setError('Paste text or choose a .txt file before saving.')
+      setError(t('docs.errorEmpty'))
       return
     }
     try {
       saveDocument({
-        title: title.trim() || 'Untitled document',
+        title: title.trim() || t('docs.untitled'),
         language,
         content,
         source: sourceRef.current
@@ -54,7 +57,7 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
       setError(null)
       sourceRef.current = 'paste'
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Document could not be saved.')
+      setError(cause instanceof Error ? cause.message : t('docs.errorSaveFailed'))
     }
   }
 
@@ -69,37 +72,37 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
       <section className="card chart-card span-6">
         <div className="card-head">
           <div>
-            <h2>Upload Text</h2>
-            <p>Paste text or choose a .txt file, pick its language, then save</p>
+            <h2>{t('docs.uploadTitle')}</h2>
+            <p>{t('docs.uploadSubtitle')}</p>
           </div>
         </div>
         <div className="form-grid">
           <label className="filter-field">
-            <span>Title</span>
+            <span>{t('docs.titleField')}</span>
             <input
               type="text"
               value={title}
-              placeholder="Document title"
+              placeholder={t('docs.titlePlaceholder')}
               onChange={(event) => setTitle(event.target.value)}
             />
           </label>
           <label className="filter-field">
-            <span>Language (stop-word list)</span>
+            <span>{t('docs.languageField')}</span>
             <select value={language} onChange={(event) => setLanguage(event.target.value as Language)}>
-              <option value="tr">Turkish (TR)</option>
-              <option value="en">English (EN)</option>
+              <option value="tr">{t('docs.langTr')}</option>
+              <option value="en">{t('docs.langEn')}</option>
             </select>
           </label>
           <label className="filter-field">
-            <span>From file</span>
+            <span>{t('docs.fileField')}</span>
             <input type="file" accept=".txt,text/plain" onChange={(event) => void handleFile(event.target.files?.[0])} />
           </label>
           <label className="filter-field">
-            <span>Content</span>
+            <span>{t('docs.contentField')}</span>
             <textarea
               rows={8}
               value={content}
-              placeholder="Paste text here…"
+              placeholder={t('docs.contentPlaceholder')}
               onChange={(event) => {
                 sourceRef.current = 'paste'
                 setContent(event.target.value)
@@ -109,7 +112,7 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
           {error && <p className="error-text">{error}</p>}
           <div className="form-actions">
             <button type="button" className="btn-primary" onClick={handleSave}>
-              Save document
+              {t('docs.save')}
             </button>
           </div>
         </div>
@@ -118,12 +121,12 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
       <section className="card chart-card span-6">
         <div className="card-head">
           <div>
-            <h2>Saved Documents</h2>
-            <p>Stored in this browser • click one to focus the Dashboard on it</p>
+            <h2>{t('docs.savedTitle')}</h2>
+            <p>{t('docs.savedSubtitle')}</p>
           </div>
         </div>
         {documents.length === 0 ? (
-          <EmptyState message="No documents saved yet." />
+          <EmptyState message={t('docs.empty')} />
         ) : (
           <ul className="doc-list">
             {documents.map((doc) => (
@@ -136,10 +139,11 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
                   <span className="doc-title">{doc.title}</span>
                   <span className="doc-meta">
                     <span className={`lang-badge lang-${doc.language}`}>{doc.language.toUpperCase()}</span>
-                    {dateFormatter.format(doc.createdAt)} • {doc.source === 'file' ? 'file' : 'paste'}
+                    {dateFormatter.format(doc.createdAt)} •{' '}
+                    {doc.source === 'file' ? t('docs.sourceFile') : t('docs.sourcePaste')}
                   </span>
                 </button>
-                <button type="button" className="icon-button" title="Delete document" onClick={() => handleDelete(doc.id)}>
+                <button type="button" className="icon-button" title={t('docs.deleteTitle')} onClick={() => handleDelete(doc.id)}>
                   ×
                 </button>
               </li>

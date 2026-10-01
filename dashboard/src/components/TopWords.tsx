@@ -1,13 +1,14 @@
 import type { WordCount } from '../types'
+import { getNumberFormatter, useLocale } from '../lib/i18n'
 import { EmptyState } from './EmptyState'
-
-const numberFormatter = new Intl.NumberFormat('en')
 
 interface TopWordsProps {
   words: WordCount[]
 }
 
 export function TopWords({ words }: TopWordsProps) {
+  const locale = useLocale()
+  const numberFormatter = getNumberFormatter(locale)
   if (words.length === 0) return <EmptyState />
 
   const max = words[0]?.value || 1

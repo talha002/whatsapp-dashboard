@@ -1,4 +1,5 @@
 import { tokenizeText } from '../../shared/text.js'
+import { getMonthFormatter, getMonthShortLabels, type Locale } from './i18n'
 import type {
   ActivityMetric,
   CategorySeries,
@@ -15,24 +16,6 @@ import type {
 export const ALL_SENDERS = 'all'
 export const ALL_YEARS = 'all'
 export const ALL_MONTHS = 'all'
-
-export const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-export const MONTH_FULL_LABELS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
-]
-
-const monthFormatter = new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' })
 
 export const MAX_MONTH_BUCKETS = 600
 
@@ -146,7 +129,8 @@ export function buildWordCountBar(
   data: ChatData,
   messages: TokenizedMessage[],
   filters: Filters,
-  mode: WordBarMode
+  mode: WordBarMode,
+  locale: Locale = 'en'
 ): CategorySeries {
   const participants = selectedParticipants(data, filters)
   const participantSet = new Set(participants)
@@ -193,7 +177,7 @@ export function buildWordCountBar(
     target.data[message.month - 1] += message.tokens.length
   }
 
-  return { categories: MONTH_LABELS, series }
+  return { categories: getMonthShortLabels(locale), series }
 }
 
 export function resolveGranularity(filters: Filters, requested: Granularity | 'auto'): Granularity {
@@ -201,14 +185,14 @@ export function resolveGranularity(filters: Filters, requested: Granularity | 'a
   return filters.year === ALL_YEARS ? 'month' : 'day'
 }
 
-function buildBuckets(data: ChatData, filters: Filters, granularity: Granularity, messages: TokenizedMessage[]) {
-  if (granularity !== 'month') return buildBuckets(data, filters, 'month', messages)
+function buildBuckets(data: ChatData, filters: Filters, granularity: Granularity, messages: TokenizedMessage[], locale: Locale = 'en') {
+  if (granularity !== 'month') return buildBuckets(data, filters, 'month', messages, locale)
 
   const buckets: Array<{ key: string; label: string }> = []
   const addMonthBucket = (year: number, month: number) => {
     buckets.push({
       key: monthKey(year, month),
-      label: monthFormatter.format(monthDate(year, month))
+      label: getMonthFormatter(locale).format(monthDate(year, month))
     })
   }
 
@@ -267,10 +251,11 @@ export function activitySeries(
   data: ChatData,
   messages: TokenizedMessage[],
   filters: Filters,
-  metric: ActivityMetric
+  metric: ActivityMetric,
+  locale: Locale = 'en'
 ): CategorySeries {
   const granularity: Granularity = 'month'
-  const buckets = buildBuckets(data, filters, granularity, messages)
+  const buckets = buildBuckets(data, filters, granularity, messages, locale)
   const bucketIndex = new Map(buckets.map((bucket, index) => [bucket.key, index]))
   const participants = selectedParticipants(data, filters)
   const series = participants.map((name) => ({ name, data: buckets.map(() => 0) }))

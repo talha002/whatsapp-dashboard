@@ -1,9 +1,8 @@
 import type { CategorySeries, WordBarMode } from '../types'
 import { categoryAxisTheme, CHART_COLORS, chartText, dataZoomTheme, legendTheme, tooltipTheme, valueAxisTheme } from '../lib/chartTheme'
+import { getNumberFormatter, useLocale, useT } from '../lib/i18n'
 import { EChart } from './EChart'
 import { EmptyState } from './EmptyState'
-
-const numberFormatter = new Intl.NumberFormat('en')
 
 type ModeOption = WordBarMode | 'auto'
 
@@ -15,6 +14,9 @@ interface WordCountBarChartProps {
 }
 
 export function WordCountBarChart({ data, mode, canCompareByMonth, onModeChange }: WordCountBarChartProps) {
+  const locale = useLocale()
+  const t = useT()
+  const numberFormatter = getNumberFormatter(locale)
   const hasValues = data.series.some((entry) => entry.data.some((value) => value > 0))
   if (data.categories.length === 0 || !hasValues) return <EmptyState />
 
@@ -23,14 +25,14 @@ export function WordCountBarChart({ data, mode, canCompareByMonth, onModeChange 
   return (
     <div className="chart-with-toolbar">
       <div className="chart-toolbar">
-        <span>Compare by</span>
+        <span>{t('bar.compareBy')}</span>
         <select value={mode} onChange={(event) => onModeChange(event.target.value as ModeOption)}>
-          <option value="auto">Auto</option>
-          <option value="year">Year</option>
+          <option value="auto">{t('bar.auto')}</option>
+          <option value="year">{t('bar.year')}</option>
           <option value="month" disabled={!canCompareByMonth}>
-            Month
+            {t('bar.month')}
           </option>
-          <option value="person">Person</option>
+          <option value="person">{t('bar.person')}</option>
         </select>
       </div>
       <EChart
@@ -56,7 +58,7 @@ export function WordCountBarChart({ data, mode, canCompareByMonth, onModeChange 
               hideOverlap: true
             }
           },
-          yAxis: { type: 'value', name: 'Words', ...valueAxisTheme },
+          yAxis: { type: 'value', name: t('bar.wordsAxis'), ...valueAxisTheme },
           dataZoom:
             data.categories.length > 12
               ? [
@@ -65,7 +67,7 @@ export function WordCountBarChart({ data, mode, canCompareByMonth, onModeChange 
                 ]
               : undefined,
           series: data.series.map((entry) => ({
-            name: entry.name,
+            name: entry.name === 'Words' ? t('bar.wordsAxis') : entry.name,
             type: 'bar',
             stack: stacked ? 'words' : undefined,
             data: entry.data,

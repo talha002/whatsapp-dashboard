@@ -31,6 +31,8 @@ import { DocumentsSection } from './components/DocumentsSection'
 import { WordListsSection } from './components/WordListsSection'
 import { getDashboardStopwordSet, useWordListVersion } from './lib/wordlists'
 import { listDocuments, mergeChatData, useDocumentsVersion } from './lib/documents'
+import { getNumberFormatter, useLocale, useT } from './lib/i18n'
+import { LanguageSwitcher } from './components/LanguageSwitcher'
 
 const dataUrl = import.meta.env.VITE_DATA_URL || '/chat-data.json'
 const appTitle = import.meta.env.VITE_APP_TITLE || 'whatsapp-dashboard'
@@ -44,6 +46,8 @@ function useFilteredMessages(messages: TokenizedMessage[], filters: Filters) {
 }
 
 export default function App() {
+  const locale = useLocale()
+  const t = useT()
   const [data, setData] = useState<ChatData | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -142,37 +146,44 @@ export default function App() {
 
   const barData = useMemo(
     () =>
-      chatData ? buildWordCountBar(chatData, tokenizedMessages, barFilters, resolvedBarMode) : { categories: [], series: [] },
-    [chatData, tokenizedMessages, barFilters, resolvedBarMode]
+      chatData
+        ? buildWordCountBar(chatData, tokenizedMessages, barFilters, resolvedBarMode, locale)
+        : { categories: [], series: [] },
+    [chatData, tokenizedMessages, barFilters, resolvedBarMode, locale]
   )
 
   const activityData = useMemo(
     () =>
-      chatData ? activitySeries(chatData, activityMessages, activityFilters, activityMetric) : { categories: [], series: [] },
-    [chatData, activityMessages, activityFilters, activityMetric]
+      chatData
+        ? activitySeries(chatData, activityMessages, activityFilters, activityMetric, locale)
+        : { categories: [], series: [] },
+    [chatData, activityMessages, activityFilters, activityMetric, locale]
   )
-  const heatmapData = useMemo(() => activityHeatmap(heatmapMessages), [heatmapMessages])
-  const sessionAnalysis = useMemo(() => conversationSessions(sessionMessages), [sessionMessages])
+  const heatmapData = useMemo(() => activityHeatmap(heatmapMessages, locale), [heatmapMessages, locale])
+  const sessionAnalysis = useMemo(() => conversationSessions(sessionMessages, 180, locale), [sessionMessages, locale])
   const styleData = useMemo(() => participantStyles(styleMessages), [styleMessages])
 
   const yearRange =
     chatData && chatData.meta.years.length
       ? `${chatData.meta.years[0]}–${chatData.meta.years[chatData.meta.years.length - 1]}`
-      : 'No parsed years'
+      : t('app.noParsedYears')
 
   return (
     <div className="app">
       <header className="hero">
         <div>
-          <p className="eyebrow">WhatsApp chat analytics</p>
+          <p className="eyebrow">{t('app.eyebrow')}</p>
           <h1>{appTitle}</h1>
           <p className="context">
             {chatData
-              ? `Overall: ${yearRange} • ${chatData.meta.participants.join(', ')}`
-              : 'Chat analytics & text analysis platform'}
+              ? t('app.overall', { range: yearRange, participants: chatData.meta.participants.join(', ') })
+              : t('app.tagline')}
           </p>
         </div>
-        <TabNav active={activeTab} onChange={setActiveTab} />
+        <div className="hero-actions">
+          <LanguageSwitcher />
+          <TabNav active={activeTab} onChange={setActiveTab} />
+        </div>
       </header>
 
       {activeTab === 'documents' && <DocumentsSection selectedId={selectedDocId} onSelect={setSelectedDocId} />}
@@ -181,9 +192,9 @@ export default function App() {
       {error && !chatData && (
         <main className="status-page">
           <section className="card status-card">
-            <h1>Dashboard data could not be loaded</h1>
+            <h1>{t('status.loadErrorTitle')}</h1>
             <p>{error}</p>
-            <p>You can still upload and analyze text documents from the Documents tab.</p>
+            <p>{t('status.loadErrorHint')}</p>
           </section>
         </main>
       )}
@@ -191,8 +202,8 @@ export default function App() {
       {activeTab === 'dashboard' && !error && !loaded && !chatData && (
         <main className="status-page">
           <section className="card status-card">
-            <h1>Loading chat analytics…</h1>
-            <p>Reading dashboard data.</p>
+            <h1>{t('status.loadingTitle')}</h1>
+            <p>{t('status.loadingBody')}</p>
           </section>
         </main>
       )}
@@ -200,8 +211,8 @@ export default function App() {
       {activeTab === 'dashboard' && !error && loaded && !chatData && (
         <main className="status-page">
           <section className="card status-card">
-            <h1>No data yet</h1>
-            <p>Waiting for a chat history upload — add a document from the Documents tab to load the dashboard.</p>
+            <h1>{t('status.noDataTitle')}</h1>
+            <p>{t('status.noDataBody')}</p>
           </section>
         </main>
       )}
@@ -211,17 +222,17 @@ export default function App() {
           {selectedDoc && (
             <div className="selection-banner">
               <span>
-                Focused on document: <strong>{selectedDoc.title}</strong>
+                {t('selection.focusedOn')} <strong>{selectedDoc.title}</strong>
               </span>
               <button type="button" onClick={() => setSelectedDocId(null)}>
-                Show all data
+                {t('selection.showAll')}
               </button>
             </div>
           )}
           <SummaryCards summary={overallSummary} />
 
       <main className="dashboard-grid">
-        <ChartCard title="Word Cloud" subtitle="Independent filters for frequent cleaned words" className="span-6">
+        <ChartCard title={t('charts.wordCloud.title')} subtitle={t('charts.wordCloud.subtitle')} className="span-6">
           <ChartFilters
             messages={tokenizedMessages}
             years={chatData.meta.years}
@@ -232,7 +243,7 @@ export default function App() {
           <WordCloudChart words={cloudWords} />
         </ChartCard>
 
-        <ChartCard title="Top 10 Words" subtitle="Independent person/year/month filters" className="span-6">
+        <ChartCard title={t('charts.topWords.title')} subtitle={t('charts.topWords.subtitle')} className="span-6">
           <ChartFilters
             messages={tokenizedMessages}
             years={chatData.meta.years}
@@ -243,7 +254,7 @@ export default function App() {
           <TopWords words={top} />
         </ChartCard>
 
-        <ChartCard title="Word Co-occurrence Network" subtitle="Top words linked when they appear close together" className="span-12">
+        <ChartCard title={t('charts.network.title')} subtitle={t('charts.network.subtitle')} className="span-12">
           <ChartFilters
             messages={tokenizedMessages}
             years={chatData.meta.years}
@@ -254,7 +265,7 @@ export default function App() {
           <WordCooccurrenceNetwork network={networkData} />
         </ChartCard>
 
-        <ChartCard title="Word Counts" subtitle="Independent filters plus year/month/person comparison" className="span-6">
+        <ChartCard title={t('charts.wordCounts.title')} subtitle={t('charts.wordCounts.subtitle')} className="span-6">
           <ChartFilters
             messages={tokenizedMessages}
             years={chatData.meta.years}
@@ -270,7 +281,7 @@ export default function App() {
           />
         </ChartCard>
 
-        <ChartCard title="Message Activity" subtitle="Independent filters with monthly per-participant lines" className="span-6">
+        <ChartCard title={t('charts.activity.title')} subtitle={t('charts.activity.subtitle')} className="span-6">
           <ChartFilters
             messages={tokenizedMessages}
             years={chatData.meta.years}
@@ -281,7 +292,7 @@ export default function App() {
           <ActivityLineChart data={activityData} metric={activityMetric} onMetricChange={setActivityMetric} />
         </ChartCard>
 
-        <ChartCard title="Response-Time Analysis" subtitle="Median reply gap by person, weekday, hour, or year" className="span-6">
+        <ChartCard title={t('charts.responseTime.title')} subtitle={t('charts.responseTime.subtitle')} className="span-6">
           <ChartFilters
             messages={tokenizedMessages}
             years={chatData.meta.years}
@@ -292,7 +303,7 @@ export default function App() {
           <ResponseTimeChart messages={responseMessages} />
         </ChartCard>
 
-        <ChartCard title="Weekday × Hour Heatmap" subtitle="When the conversation is active" className="span-6">
+        <ChartCard title={t('charts.heatmap.title')} subtitle={t('charts.heatmap.subtitle')} className="span-6">
           <ChartFilters
             messages={tokenizedMessages}
             years={chatData.meta.years}
@@ -303,7 +314,7 @@ export default function App() {
           <ActivityHeatmapChart data={heatmapData} />
         </ChartCard>
 
-        <ChartCard title="Conversation Sessions" subtitle="Sessions split after 3 hours of silence" className="span-6">
+        <ChartCard title={t('charts.sessions.title')} subtitle={t('charts.sessions.subtitle')} className="span-6">
           <ChartFilters
             messages={tokenizedMessages}
             years={chatData.meta.years}
@@ -314,7 +325,7 @@ export default function App() {
           <ConversationSessionsCard analysis={sessionAnalysis} />
         </ChartCard>
 
-        <ChartCard title="Participant Style" subtitle="Length, vocabulary, questions, emoji, links, and placeholders" className="span-6">
+        <ChartCard title={t('charts.participantStyle.title')} subtitle={t('charts.participantStyle.subtitle')} className="span-6">
           <ChartFilters
             messages={tokenizedMessages}
             years={chatData.meta.years}
@@ -327,10 +338,16 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <span>Sources: {chatData.meta.sourceFiles.join(' • ')}</span>
         <span>
-          Parsed {chatData.meta.totalMessages.toLocaleString('en')} messages • {chatData.meta.systemEvents} system events •{' '}
-          {chatData.meta.continuationLines} continuation lines • {chatData.meta.placeholderMessages} placeholders
+          {t('app.sources')} {chatData.meta.sourceFiles.join(' • ')}
+        </span>
+        <span>
+          {t('app.footerParsed', {
+            messages: getNumberFormatter(locale).format(chatData.meta.totalMessages),
+            systemEvents: chatData.meta.systemEvents,
+            continuationLines: chatData.meta.continuationLines,
+            placeholders: chatData.meta.placeholderMessages
+          })}
         </span>
       </footer>
         </>

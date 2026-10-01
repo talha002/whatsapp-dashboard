@@ -11,6 +11,7 @@ import {
   resetStopwords,
   useWordListVersion
 } from '../lib/wordlists'
+import { useT } from '../lib/i18n'
 import { EmptyState } from './EmptyState'
 
 interface ChipListProps {
@@ -20,13 +21,14 @@ interface ChipListProps {
 }
 
 function ChipList({ words, customWords, onRemove }: ChipListProps) {
-  if (words.length === 0) return <EmptyState message="No words to show." />
+  const t = useT()
+  if (words.length === 0) return <EmptyState message={t('wordlists.empty')} />
   return (
     <div className="chip-cloud">
       {words.map((word) => (
         <span key={word} className={customWords?.has(word.toLocaleLowerCase('tr')) ? 'chip custom' : 'chip'}>
           {word}
-          <button type="button" title="Remove word" onClick={() => onRemove(word)}>
+          <button type="button" title={t('wordlists.removeWord')} onClick={() => onRemove(word)}>
             ×
           </button>
         </span>
@@ -36,6 +38,7 @@ function ChipList({ words, customWords, onRemove }: ChipListProps) {
 }
 
 export function WordListsSection() {
+  const t = useT()
   const [language, setLanguage] = useState<Language>('tr')
   const [stopwordInput, setStopwordInput] = useState('')
   const [stopwordFilter, setStopwordFilter] = useState('')
@@ -71,9 +74,12 @@ export function WordListsSection() {
       <section className="card chart-card span-6">
         <div className="card-head">
           <div>
-            <h2>Stop-Words</h2>
+            <h2>{t('wordlists.stopwordsTitle')}</h2>
             <p>
-              {stopwords.length} active words for {language === 'tr' ? 'Turkish' : 'English'} • excluded from all analysis
+              {t('wordlists.stopwordsSubtitle', {
+                count: stopwords.length,
+                language: language === 'tr' ? t('wordlists.turkish') : t('wordlists.english')
+              })}
             </p>
           </div>
         </div>
@@ -87,16 +93,16 @@ export function WordListsSection() {
             </button>
           </div>
           <button type="button" className="icon-button wide" onClick={() => resetStopwords(language)}>
-            Reset defaults
+            {t('wordlists.resetDefaults')}
           </button>
         </div>
         <div className="form-grid two-col">
           <label className="filter-field">
-            <span>Add stop-word ({language.toUpperCase()})</span>
+            <span>{t('wordlists.addStopword', { language: language.toUpperCase() })}</span>
             <input
               type="text"
               value={stopwordInput}
-              placeholder="e.g. şey"
+              placeholder={t('wordlists.stopwordPlaceholder')}
               onChange={(event) => setStopwordInput(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') handleAddStopword()
@@ -104,18 +110,18 @@ export function WordListsSection() {
             />
           </label>
           <label className="filter-field">
-            <span>Filter list</span>
+            <span>{t('wordlists.filterList')}</span>
             <input
               type="text"
               value={stopwordFilter}
-              placeholder="Search words…"
+              placeholder={t('wordlists.searchPlaceholder')}
               onChange={(event) => setStopwordFilter(event.target.value)}
             />
           </label>
         </div>
         <div className="form-actions">
           <button type="button" className="btn-primary" onClick={handleAddStopword}>
-            Add stop-word
+            {t('wordlists.addStopwordButton')}
           </button>
         </div>
         <ChipList words={filteredStopwords} customWords={customStopwords} onRemove={(word) => removeStopword(language, word)} />
@@ -124,17 +130,17 @@ export function WordListsSection() {
       <section className="card chart-card span-6">
         <div className="card-head">
           <div>
-            <h2>Ban-Words</h2>
-            <p>{banWords.length} banned words • excluded from every analysis in all languages</p>
+            <h2>{t('wordlists.banwordsTitle')}</h2>
+            <p>{t('wordlists.banwordsSubtitle', { count: banWords.length })}</p>
           </div>
         </div>
         <div className="form-grid">
           <label className="filter-field">
-            <span>Add ban-word</span>
+            <span>{t('wordlists.addBanword')}</span>
             <input
               type="text"
               value={banwordInput}
-              placeholder="Word to ban from analysis…"
+              placeholder={t('wordlists.banwordPlaceholder')}
               onChange={(event) => setBanwordInput(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') handleAddBanword()
@@ -144,7 +150,7 @@ export function WordListsSection() {
         </div>
         <div className="form-actions">
           <button type="button" className="btn-primary" onClick={handleAddBanword}>
-            Add ban-word
+            {t('wordlists.addBanwordButton')}
           </button>
         </div>
         <ChipList words={banWords} onRemove={removeBanWord} />

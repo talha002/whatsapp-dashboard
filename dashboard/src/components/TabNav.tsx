@@ -1,10 +1,6 @@
-export type AppTab = 'dashboard' | 'documents' | 'wordlists'
+import { useT } from '../lib/i18n'
 
-const TABS: { id: AppTab; label: string }[] = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'documents', label: 'Documents' },
-  { id: 'wordlists', label: 'Word Lists' }
-]
+export type AppTab = 'dashboard' | 'documents' | 'wordlists'
 
 interface TabNavProps {
   active: AppTab
@@ -12,9 +8,15 @@ interface TabNavProps {
 }
 
 export function TabNav({ active, onChange }: TabNavProps) {
+  const t = useT()
+  const tabs: { id: AppTab; label: string }[] = [
+    { id: 'dashboard', label: t('tabs.dashboard') },
+    { id: 'documents', label: t('tabs.documents') },
+    { id: 'wordlists', label: t('tabs.wordlists') }
+  ]
   return (
     <nav className="tab-nav">
-      {TABS.map((tab) => (
+      {tabs.map((tab) => (
         <button
           key={tab.id}
           type="button"
