@@ -1,3 +1,4 @@
+import { languages, languageCodes } from '../lib/languages'
 import { useRef, useState } from 'react'
 import type { Language, StoredDocument } from '../types'
 import { deleteDocument, listDocuments, saveDocument } from '../lib/documents'
@@ -17,7 +18,7 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
   const dateFormatter = getDateTimeFormatter(locale)
   const [documents, setDocuments] = useState<StoredDocument[]>(() => listDocuments())
   const [title, setTitle] = useState('')
-  const [language, setLanguage] = useState<Language>('tr')
+  const [language, setLanguage] = useState<Language>(locale)
   const [content, setContent] = useState('')
   const [error, setError] = useState<string | null>(null)
   const sourceRef = useRef<'paste' | 'file'>('paste')
@@ -89,8 +90,7 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
           <label className="filter-field">
             <span>{t('docs.languageField')}</span>
             <select value={language} onChange={(event) => setLanguage(event.target.value as Language)}>
-              <option value="tr">{t('docs.langTr')}</option>
-              <option value="en">{t('docs.langEn')}</option>
+              {languageCodes.map(code => <option key={code} value={code} lang={code}>{languages[code]} ({code.toUpperCase()})</option>)}
             </select>
           </label>
           <label className="filter-field">

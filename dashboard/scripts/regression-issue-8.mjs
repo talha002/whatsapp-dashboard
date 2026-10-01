@@ -5,6 +5,7 @@ import { build } from 'esbuild'
 
 // In-memory localStorage stub, installed before the app modules load.
 const storage = new Map()
+Object.defineProperty(globalThis, 'navigator', { value: { language: 'en-US' }, configurable: true })
 globalThis.localStorage = {
   getItem: (key) => (storage.has(key) ? storage.get(key) : null),
   setItem: (key, value) => storage.set(key, String(value)),
@@ -26,16 +27,17 @@ const bundled = await build({
 const app = await import('data:text/javascript;base64,' + Buffer.from(bundled.outputFiles[0].text).toString('base64'))
 const { i18n } = app
 
-// 1. Auto-detection: tr* -> Turkish, everything else -> English.
+// 1. Auto-detection: supported language tags resolve; unknown languages use English.
 {
   assert.equal(i18n.detectLocale('tr-TR'), 'tr')
   assert.equal(i18n.detectLocale('tr'), 'tr')
   assert.equal(i18n.detectLocale('TR-tr'), 'tr', 'detection is case-insensitive')
   assert.equal(i18n.detectLocale('en-US'), 'en')
-  assert.equal(i18n.detectLocale('de-DE'), 'en')
+  assert.equal(i18n.detectLocale('de-DE'), 'de')
+  assert.equal(i18n.detectLocale('ja-JP'), 'en')
   assert.equal(i18n.detectLocale(undefined), 'en')
   assert.equal(i18n.detectLocale(''), 'en')
-  console.log('detection ok: tr* -> tr, other/missing -> en')
+  console.log('detection ok: supported languages detected, unknown/missing -> en')
 }
 
 // 2. Resolution: stored preference beats auto-detection; no stored -> detect.
@@ -43,7 +45,7 @@ const { i18n } = app
   assert.equal(i18n.resolveLocale('tr', 'en-US'), 'tr', 'stored tr beats en browser')
   assert.equal(i18n.resolveLocale('en', 'tr-TR'), 'en', 'stored en beats tr browser')
   assert.equal(i18n.resolveLocale(null, 'tr-TR'), 'tr', 'no stored -> detect tr')
-  assert.equal(i18n.resolveLocale(null, 'fr-FR'), 'en', 'no stored -> default en')
+  assert.equal(i18n.resolveLocale(null, 'fr-FR'), 'fr', 'no stored -> detect fr')
   assert.equal(i18n.resolveLocale('garbage', 'tr-TR'), 'tr', 'invalid stored value falls back to detection')
   console.log('resolution ok: stored wins, detection fallback, garbage rejected')
 }

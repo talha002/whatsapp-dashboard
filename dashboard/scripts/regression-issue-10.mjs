@@ -6,6 +6,7 @@ import { build } from 'esbuild'
 
 // In-memory localStorage stub, installed before the app modules load.
 const storage = new Map()
+Object.defineProperty(globalThis, 'navigator', { value: { language: 'en-US' }, configurable: true })
 globalThis.localStorage = {
   getItem: (key) => (storage.has(key) ? storage.get(key) : null),
   setItem: (key, value) => storage.set(key, String(value)),

@@ -1,3 +1,5 @@
+import { getStopwordSet } from './wordlists'
+import type { Language } from '../types'
 import { tokenizeText } from '../../shared/text.js'
 import { getMonthFormatter, getMonthShortLabels, type Locale } from './i18n'
 import type {
@@ -47,9 +49,14 @@ function hourKey(year: number, month: number, day: number, hour: number) {
 }
 
 export function withTokens(messages: ChatMessage[], stopwords?: Set<string>): TokenizedMessage[] {
+  const languageStopwords = new Map<Language, Set<string>>()
+  const wordsFor = (language: Language) => {
+    if (!languageStopwords.has(language)) languageStopwords.set(language, getStopwordSet(language))
+    return languageStopwords.get(language)!
+  }
   return messages.map((message) => ({
     ...message,
-    tokens: message.placeholder ? [] : tokenizeText(message.text, stopwords)
+    tokens: message.placeholder ? [] : tokenizeText(message.text, message.language ? wordsFor(message.language) : stopwords, message.language)
   }))
 }
 
@@ -189,7 +196,7 @@ function buildBuckets(data: ChatData, filters: Filters, granularity: Granularity
   if (granularity === 'day' && filters.year !== ALL_YEARS && filters.month !== ALL_MONTHS) {
     const year = filters.year
     const month = filters.month
-    const formatter = new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-US', {
+    const formatter = new Intl.DateTimeFormat(locale, {
       day: 'numeric',
       month: 'short',
       timeZone: 'UTC'

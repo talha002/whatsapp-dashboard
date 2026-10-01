@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { getLocale, translate } from './i18n'
+import { isLanguage } from './languages'
 import { parseChatText } from '../../shared/parser.js'
 import type { ChatData, ChatMessage, ChatMeta, Language, StoredDocument } from '../types'
 
@@ -37,6 +38,7 @@ export function listDocuments(): StoredDocument[] {
     if (!Array.isArray(parsed)) return []
     return parsed
       .filter((doc) => doc && typeof doc.id === 'string' && typeof doc.content === 'string')
+      .map(doc => ({ ...doc, language: isLanguage(doc.language) ? doc.language : 'en' }))
       .sort((a, b) => b.createdAt - a.createdAt)
   } catch {
     return []
@@ -87,11 +89,12 @@ export function documentsToMessages(documents: StoredDocument[]): ChatMessage[] 
   for (const doc of documents) {
     const parsed = parseChatText(doc.content)
     if (parsed.messages.length > 0) {
-      messages.push(...parsed.messages)
+      messages.push(...parsed.messages.map(message => ({ ...message, language: doc.language })))
       continue
     }
     const created = new Date(doc.createdAt)
     const base: Omit<ChatMessage, 'text' | 'line'> = {
+      language: doc.language,
       timestamp: doc.createdAt,
       date: created.toISOString(),
       year: created.getFullYear(),

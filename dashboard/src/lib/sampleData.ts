@@ -16,7 +16,7 @@ const SAMPLE_START = Date.UTC(2026, 7, 31)
 const SAMPLE_DAYS = 28
 const SEED = 0x9e3779b9
 
-const samples: Record<Locale, SampleSpec> = {
+const samples: Record<'en' | 'tr', SampleSpec> = {
   en: {
     participants: ['Alex', 'Maya', 'Leo'],
     phrases: [
@@ -180,9 +180,10 @@ function buildSampleContent(spec: SampleSpec): string {
 }
 
 export function getSampleChat(locale: Locale): SampleChat {
+  const language = locale === 'tr' ? 'tr' : 'en'
   return {
     title: translate(locale, 'onboarding.sampleTitle'),
-    language: locale,
-    content: buildSampleContent(samples[locale])
+    language,
+    content: buildSampleContent(samples[language])
   }
 }

@@ -1,4 +1,8 @@
+import type { Language } from './lib/languages'
+export type { Language } from './lib/languages'
+
 export interface ChatMessage {
+  language?: Language
   timestamp: number
   date: string
   year: number
@@ -83,7 +87,7 @@ export type Granularity = 'month' | 'day' | 'hour'
 export type ActivityMetric = 'messages' | 'words'
 export type WordBarMode = 'year' | 'month' | 'person'
 
-export type Language = 'tr' | 'en'
+
 
 export interface WordListDiff {
   added: string[]

@@ -1,3 +1,11 @@
+import es from './stopwords/es.js'
+import fr from './stopwords/fr.js'
+import pt from './stopwords/pt.js'
+import de from './stopwords/de.js'
+import it from './stopwords/it.js'
+import pl from './stopwords/pl.js'
+import ro from './stopwords/ro.js'
+
 const BIDI_RE = /[\u200e\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g
 const URL_RE = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi
 const TAG_RE = /<[^<>]*>/g
@@ -55,14 +63,49 @@ export function escapeHtml(value = '') {
   return String(value).replace(HTML_ESCAPE_RE, (char) => HTML_ESCAPE_MAP[char])
 }
 
-export function normalizeToken(value = '') {
-  return normalizeUnicode(value).trim().toLocaleLowerCase('tr')
+function lowercase(value, language) {
+  const lowered = value.toLocaleLowerCase(language).normalize('NFC')
+  // Older Romanian lists/exports use cedillas; modern spelling uses commas below.
+  return language === 'ro' ? lowered.replace(/ş/g, 'ș').replace(/ţ/g, 'ț') : lowered
 }
 
-const STOPWORDS = new Set([...TURKISH_STOPWORDS, ...TURKISH_CHAT_STOPWORDS, ...ENGLISH_STOPWORDS].map(normalizeToken))
+export function normalizeToken(value = '', language = 'en') {
+  return lowercase(normalizeUnicode(value).trim(), language)
+}
+
+// Language-specific chat fillers, not translations of the EN/TR lists.
+// Sources and editorial choices are documented in stopwords/README.md.
+export const SPANISH_STOPWORDS = es
+export const FRENCH_STOPWORDS = fr
+export const PORTUGUESE_STOPWORDS = pt
+export const GERMAN_STOPWORDS = de
+export const ITALIAN_STOPWORDS = it
+export const POLISH_STOPWORDS = pl
+export const ROMANIAN_STOPWORDS = ro
+export const SPANISH_CHAT_STOPWORDS = ['jaja', 'jajaja', 'jeje', 'xd', 'tqm']
+export const FRENCH_CHAT_STOPWORDS = ['mdr', 'ptdr', 'slt', 'bjr', 'stp', 'svp', 'tkt']
+export const PORTUGUESE_CHAT_STOPWORDS = ['rs', 'rsrs', 'rsrsrs', 'kkk', 'kkkk', 'vc', 'vcs', 'blz', 'vlw']
+export const GERMAN_CHAT_STOPWORDS = ['digga', 'digger', 'lol', 'lg', 'mfg', 'hdl']
+export const ITALIAN_CHAT_STOPWORDS = ['ahah', 'ahahah', 'tvb', 'tvtb', 'cmq', 'nn', 'xké', 'xke']
+export const POLISH_CHAT_STOPWORDS = ['no', 'xd', 'xddd', 'hej', 'elo', 'spoko', 'nwm', 'pzdr']
+export const ROMANIAN_CHAT_STOPWORDS = ['ms', 'mersi', 'sal', 'cf', 'bn', 'nb', 'pwp']
+
+export const DEFAULT_STOPWORDS = {
+  en: ENGLISH_STOPWORDS,
+  tr: [...TURKISH_STOPWORDS, ...TURKISH_CHAT_STOPWORDS],
+  es: [...es, ...SPANISH_CHAT_STOPWORDS],
+  fr: [...fr, ...FRENCH_CHAT_STOPWORDS],
+  pt: [...pt, ...PORTUGUESE_CHAT_STOPWORDS],
+  de: [...de, ...GERMAN_CHAT_STOPWORDS],
+  it: [...it, ...ITALIAN_CHAT_STOPWORDS],
+  pl: [...pl, ...POLISH_CHAT_STOPWORDS],
+  ro: [...ro, ...ROMANIAN_CHAT_STOPWORDS]
+}
+// Untagged legacy datasets retain the original EN/TR combined defaults.
+const STOPWORDS = new Set([...DEFAULT_STOPWORDS.tr, ...DEFAULT_STOPWORDS.en].map(word => normalizeToken(word, 'tr')))
 
 export function isPlaceholderText(value = '') {
-  const normalized = normalizeToken(value)
+  const normalized = normalizeToken(value, 'tr')
   return normalized === '<medya dahil edilmedi>' ||
     normalized === '<media omitted>' ||
     normalized === 'bu mesajı sildiniz' ||
@@ -70,17 +113,18 @@ export function isPlaceholderText(value = '') {
     normalized === 'you deleted this message'
 }
 
-export function cleanTextForWords(value = '') {
-  return normalizeUnicode(value)
+export function cleanTextForWords(value = '', language = 'tr') {
+  return lowercase(normalizeUnicode(value)
     .replace(URL_RE, ' ')
     .replace(TAG_RE, ' ')
-    .replace(/@/g, ' ')
-    .toLocaleLowerCase('tr')
+    .replace(/@/g, ' '), language)
 }
 
-export function tokenizeText(value = '', stopwords) {
-  const active = stopwords || STOPWORDS
-  const cleaned = cleanTextForWords(value)
+export function tokenizeText(value = '', stopwords, language) {
+  const active = stopwords || (language && DEFAULT_STOPWORDS[language]
+    ? new Set(DEFAULT_STOPWORDS[language].map(word => normalizeToken(word, language)))
+    : STOPWORDS)
+  const cleaned = cleanTextForWords(value, language)
   const matches = cleaned.match(TOKEN_RE) || []
   return matches.filter((token) => token.length > 1 && !active.has(token))
 }

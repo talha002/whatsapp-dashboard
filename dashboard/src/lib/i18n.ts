@@ -1,11 +1,20 @@
 import { useSyncExternalStore } from 'react'
 
-export type Locale = 'en' | 'tr'
+import { isLanguage, type Language } from './languages'
+import es from './locales/es'
+import fr from './locales/fr'
+import pt from './locales/pt'
+import de from './locales/de'
+import it from './locales/it'
+import pl from './locales/pl'
+import ro from './locales/ro'
+
+export type Locale = Language
 
 const STORAGE_KEY = 'wp:locale'
 
 function isLocale(value: string | null): value is Locale {
-  return value === 'en' || value === 'tr'
+  return isLanguage(value)
 }
 
 const en = {
@@ -376,10 +385,11 @@ const tr: Record<keyof typeof en, string> = {
 
 export type MessageKey = keyof typeof en
 
-export const messages: Record<Locale, Record<MessageKey, string>> = { en, tr }
+export const messages: Record<Locale, Record<MessageKey, string>> = { en, tr, es, fr, pt, de, it, pl, ro }
 
 export function detectLocale(language?: string): Locale {
-  return typeof language === 'string' && language.toLowerCase().startsWith('tr') ? 'tr' : 'en'
+  const base = language?.toLowerCase().split('-')[0]
+  return isLanguage(base) ? base : 'en'
 }
 
 export function resolveLocale(stored: string | null, language?: string): Locale {
@@ -418,11 +428,11 @@ export function getLocale(): Locale {
 }
 
 export function setLocale(locale: Locale) {
-  if (locale === currentLocale) return
-  currentLocale = locale
   try {
     localStorage.setItem(STORAGE_KEY, locale)
   } catch {}
+  if (locale === currentLocale) return
+  currentLocale = locale
   for (const listener of listeners) listener()
 }
 

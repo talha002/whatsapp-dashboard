@@ -1,3 +1,4 @@
+import { languages, languageCodes } from '../lib/languages'
 import { setLocale, useLocale, useT, type Locale } from '../lib/i18n'
 
 export function LanguageSwitcher() {
@@ -7,8 +8,7 @@ export function LanguageSwitcher() {
     <label className="filter-field lang-switcher">
       <span>{t('lang.switchLabel')}</span>
       <select value={locale} onChange={(event) => setLocale(event.target.value as Locale)}>
-        <option value="en" lang="en">{t('lang.english')}</option>
-        <option value="tr" lang="tr">{t('lang.turkish')}</option>
+        {languageCodes.map(code => <option key={code} value={code} lang={code}>{languages[code]}</option>)}
       </select>
     </label>
   )

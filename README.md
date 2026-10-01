@@ -7,7 +7,8 @@ No backend database, no accounts, no tracking — uploaded documents and all set
 ## Features
 
 - **Document upload** — paste text or choose a `.txt` file. WhatsApp exports (`DD.MM.YYYY HH:MM - Sender: message`) are parsed into real messages with senders and timestamps; any other text is analyzed as line-based messages.
-- **Language-aware analysis** — pick Turkish (TR) or English (EN) per upload; the matching stop-word list is applied.
+- **Nine platform languages** — English, Türkçe, Español, Français, Português, Deutsch, Italiano, Polski, and Română. The interface detects your browser language, and saves your dropdown choice.
+- **Language-aware analysis** — select the text language per upload; its own general and chat stop-word lists apply, even when viewing several languages together. Changing the interface language does not change document analysis.
 - **Editable word lists** — add/remove stop-words per language, restore defaults, and maintain a ban-word list excluded from every analysis.
 - **Interactive dashboard** — word cloud, top 10 words, word co-occurrence network, word counts by year/month/person, message activity, response-time analysis, weekday × hour heatmap, conversation sessions, and participant style — each with independent year/month/person filters and fullscreen mode.
 - **Focus mode** — click a saved document to focus the whole dashboard on just that document.
@@ -53,10 +54,14 @@ Open http://localhost:8080 (override with `DASHBOARD_PORT=3000 docker compose up
 ## Usage
 
 1. Export a WhatsApp chat (`Chat → More → Export chat → Without media`) or prepare any `.txt` file.
-2. Open the **Documents** tab, paste the text or choose the file, select the language (TR/EN), and save.
+2. Open the **Documents** tab, paste the text or choose the file, select the text language, and save.
 3. Switch to the **Dashboard** tab — all charts update instantly.
 4. Click a document in the list to focus the dashboard on it; click again (or "Show all data") to return to the merged view.
-5. Use the **Word Lists** tab to tune TR/EN stop-words and ban-words; changes apply live to every chart.
+5. Use the **Word Lists** tab to tune each language's stop-words and global ban-words; changes apply live to every chart.
+
+The new stop-word lists include established language-specific collections and chat expressions. See [sources and normalization rules](dashboard/shared/stopwords/README.md). Untagged legacy datasets retain EN/TR filtering. Sample chats are available in English and Turkish.
+
+Language regression checks: `cd dashboard && node scripts/regression-issue-13.mjs`.
 
 ## Configuration
 
@@ -78,7 +83,8 @@ Environment variables (see `dashboard/.env.example`):
     ├── scripts/serve.mjs            # production static server (no framework)
     ├── shared/                      # isomorphic text parsing/tokenizing (Node + browser)
     │   ├── parser.js                # WhatsApp export line parser
-    │   └── text.js                  # tokenization + built-in TR/EN stop-words
+    │   ├── text.js                  # language-aware tokenization + chat stop-words
+    │   └── stopwords/               # sourced ES/FR/PT/DE/IT/PL/RO lists + license
     └── src/
         ├── App.tsx                  # tabs, data flow, all chart state
         ├── lib/                     # stats, analysis, cooccurrence, documents, wordlists

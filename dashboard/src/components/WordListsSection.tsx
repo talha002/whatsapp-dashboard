@@ -1,3 +1,5 @@
+import { languages, languageCodes } from '../lib/languages'
+import { normalizeToken } from '../../shared/text.js'
 import { useMemo, useState } from 'react'
 import type { Language } from '../types'
 import {
@@ -11,22 +13,23 @@ import {
   resetStopwords,
   useWordListVersion
 } from '../lib/wordlists'
-import { useT } from '../lib/i18n'
+import { useT, useLocale } from '../lib/i18n'
 import { EmptyState } from './EmptyState'
 
 interface ChipListProps {
+  language?: Language
   words: string[]
   customWords?: Set<string>
   onRemove: (word: string) => void
 }
 
-function ChipList({ words, customWords, onRemove }: ChipListProps) {
+function ChipList({ words, customWords, onRemove, language }: ChipListProps) {
   const t = useT()
   if (words.length === 0) return <EmptyState message={t('wordlists.empty')} />
   return (
     <div className="chip-cloud">
       {words.map((word) => (
-        <span key={word} className={customWords?.has(word.toLocaleLowerCase('tr')) ? 'chip custom' : 'chip'}>
+        <span key={word} className={customWords?.has(normalizeToken(word, language)) ? 'chip custom' : 'chip'}>
           {word}
           <button type="button" title={t('wordlists.removeWord')} onClick={() => onRemove(word)}>
             ×
@@ -39,7 +42,8 @@ function ChipList({ words, customWords, onRemove }: ChipListProps) {
 
 export function WordListsSection() {
   const t = useT()
-  const [language, setLanguage] = useState<Language>('tr')
+  const locale = useLocale()
+  const [language, setLanguage] = useState<Language>(locale)
   const [stopwordInput, setStopwordInput] = useState('')
   const [stopwordFilter, setStopwordFilter] = useState('')
   const [banwordInput, setBanwordInput] = useState('')
@@ -50,10 +54,10 @@ export function WordListsSection() {
   const banWords = useMemo(() => getBanWords(), [version])
 
   const filteredStopwords = useMemo(() => {
-    const query = stopwordFilter.trim().toLocaleLowerCase('tr')
+    const query = normalizeToken(stopwordFilter, language)
     if (!query) return stopwords
-    return stopwords.filter((word) => word.toLocaleLowerCase('tr').includes(query))
-  }, [stopwords, stopwordFilter])
+    return stopwords.filter((word) => normalizeToken(word, language).includes(query))
+  }, [stopwords, stopwordFilter, language])
 
   const handleAddStopword = () => {
     const word = stopwordInput.trim()
@@ -78,20 +82,18 @@ export function WordListsSection() {
             <p>
               {t('wordlists.stopwordsSubtitle', {
                 count: stopwords.length,
-                language: language === 'tr' ? t('wordlists.turkish') : t('wordlists.english')
+                language: languages[language]
               })}
             </p>
           </div>
         </div>
         <div className="chart-toolbar split">
-          <div className="segmented">
-            <button type="button" className={language === 'tr' ? 'active' : ''} onClick={() => setLanguage('tr')}>
-              {t('lang.turkish')}
-            </button>
-            <button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>
-              {t('lang.english')}
-            </button>
-          </div>
+          <label className="filter-field">
+            <span>{t('lang.switchLabel')}</span>
+            <select value={language} onChange={event => setLanguage(event.target.value as Language)}>
+              {languageCodes.map(code => <option key={code} value={code} lang={code}>{languages[code]}</option>)}
+            </select>
+          </label>
           <button type="button" className="icon-button wide" onClick={() => resetStopwords(language)}>
             {t('wordlists.resetDefaults')}
           </button>
@@ -124,7 +126,7 @@ export function WordListsSection() {
             {t('wordlists.addStopwordButton')}
           </button>
         </div>
-        <ChipList words={filteredStopwords} customWords={customStopwords} onRemove={(word) => removeStopword(language, word)} />
+        <ChipList language={language} words={filteredStopwords} customWords={customStopwords} onRemove={(word) => removeStopword(language, word)} />
       </section>
 
       <section className="card chart-card span-6">
