@@ -27,6 +27,7 @@ import { ParticipantStyleChart } from './components/ParticipantStyleChart'
 import { ResponseTimeChart } from './components/ResponseTimeChart'
 import { WordCooccurrenceNetwork } from './components/WordCooccurrenceNetwork'
 import { TabNav, type AppTab } from './components/TabNav'
+import { WelcomePanel } from './components/WelcomePanel'
 import { DocumentsSection } from './components/DocumentsSection'
 import { WordListsSection } from './components/WordListsSection'
 import { getDashboardStopwordSet, useWordListVersion } from './lib/wordlists'
@@ -209,12 +210,7 @@ export default function App() {
       )}
 
       {activeTab === 'dashboard' && !error && loaded && !chatData && (
-        <main className="status-page">
-          <section className="card status-card">
-            <h1>{t('status.noDataTitle')}</h1>
-            <p>{t('status.noDataBody')}</p>
-          </section>
-        </main>
+        <WelcomePanel onUploadClick={() => setActiveTab('documents')} />
       )}
 
       {activeTab === 'dashboard' && chatData && (
