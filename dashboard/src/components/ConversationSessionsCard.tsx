@@ -27,7 +27,7 @@ export function ConversationSessionsCard({ analysis }: ConversationSessionsCardP
         </div>
         <div>
           <span>{t('sessions.medianGap')}</span>
-          <strong>{analysis.medianGapMinutes.toFixed(1)}m</strong>
+          <strong>{t('time.minutes', { count: numberFormatter.format(analysis.medianGapMinutes) })}</strong>
         </div>
       </div>
       <EChart

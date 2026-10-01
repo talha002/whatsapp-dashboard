@@ -74,6 +74,10 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
+
+  useEffect(() => {
     let alive = true
     fetch(dataUrl)
       .then((response) => {
@@ -191,7 +195,7 @@ export default function App() {
       {activeTab === 'documents' && <DocumentsSection selectedId={selectedDocId} onSelect={setSelectedDocId} />}
       {activeTab === 'wordlists' && <WordListsSection />}
 
-      {error && !chatData && <LoadErrorCard error={error} onGoToDocuments={() => setActiveTab('documents')} />}
+      {error && !chatData && <LoadErrorCard error={t('status.loadErrorDetail')} onGoToDocuments={() => setActiveTab('documents')} />}
 
       {activeTab === 'dashboard' && !error && !loaded && !chatData && (
         <main className="status-page">

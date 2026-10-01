@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useT } from '../lib/i18n'
 
 interface ChartCardProps {
   title: string
@@ -9,6 +10,7 @@ interface ChartCardProps {
 }
 
 export function ChartCard({ title, subtitle, className = '', children }: ChartCardProps) {
+  const t = useT()
   const cardRef = useRef<HTMLElement | null>(null)
   const [expanded, setExpanded] = useState(false)
 
@@ -38,8 +40,8 @@ export function ChartCard({ title, subtitle, className = '', children }: ChartCa
         <button
           type="button"
           className="icon-button"
-          aria-label={expanded ? 'Exit fullscreen' : 'Expand chart'}
-          title={expanded ? 'Exit fullscreen' : 'Expand chart'}
+          aria-label={t(expanded ? 'charts.exitFullscreen' : 'charts.expand')}
+          title={t(expanded ? 'charts.exitFullscreen' : 'charts.expand')}
           onClick={() => {
             void toggleFullscreen()
           }}

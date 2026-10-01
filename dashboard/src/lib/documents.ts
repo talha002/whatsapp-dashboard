@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { getLocale, translate } from './i18n'
 import { parseChatText } from '../../shared/parser.js'
 import type { ChatData, ChatMessage, ChatMeta, Language, StoredDocument } from '../types'
 
@@ -47,9 +48,9 @@ function writeDocuments(documents: StoredDocument[]) {
     localStorage.setItem(DOCUMENTS_KEY, JSON.stringify(documents))
   } catch (error) {
     if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-      throw new Error('Browser storage is full. Delete some documents or upload a smaller file.')
+      throw new Error(translate(getLocale(), 'docs.errorStorageFull'))
     }
-    throw error
+    throw new Error(translate(getLocale(), 'docs.errorSaveFailed'))
   }
   emit()
 }
@@ -63,7 +64,7 @@ interface SaveDocumentInput {
 
 export function saveDocument(input: SaveDocumentInput): StoredDocument {
   if (input.content.length > MAX_CONTENT_CHARS) {
-    throw new Error('Document is too large (25 MB maximum).')
+    throw new Error(translate(getLocale(), 'docs.errorTooLarge'))
   }
   const document: StoredDocument = {
     id: crypto.randomUUID(),

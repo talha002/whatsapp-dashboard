@@ -3,7 +3,7 @@ import type { TokenizedMessage } from '../types'
 import type { ResponseDimension } from '../lib/analysis'
 import { responseTimeAnalysis } from '../lib/analysis'
 import { categoryAxisTheme, CHART_COLORS, chartText, dataZoomTheme, legendTheme, tooltipTheme, valueAxisTheme } from '../lib/chartTheme'
-import { getNumberFormatter, useLocale, useT } from '../lib/i18n'
+import { getNumberFormatter, translate, useLocale, useT, type Locale } from '../lib/i18n'
 import { escapeHtml } from '../../shared/text.js'
 import { EChart } from './EChart'
 import { EmptyState } from './EmptyState'
@@ -12,13 +12,14 @@ interface ResponseTimeChartProps {
   messages: TokenizedMessage[]
 }
 
-function formatMinutes(minutes: number) {
+function formatMinutes(minutes: number, locale: Locale) {
   if (minutes >= 90) {
-    const hours = Math.floor(minutes / 60)
-    const remaining = Math.round(minutes % 60)
-    return remaining > 0 ? `${hours}h ${remaining}m` : `${hours}h`
+    const hours = Math.floor(Math.round(minutes) / 60)
+    const remaining = Math.round(minutes) % 60
+    const hoursLabel = translate(locale, 'time.hours', { count: getNumberFormatter(locale).format(hours) })
+    return remaining > 0 ? `${hoursLabel} ${translate(locale, 'time.minutes', { count: getNumberFormatter(locale).format(remaining) })}` : hoursLabel
   }
-  return `${Math.round(minutes)}m`
+  return translate(locale, 'time.minutes', { count: getNumberFormatter(locale).format(Math.round(minutes)) })
 }
 
 export function ResponseTimeChart({ messages }: ResponseTimeChartProps) {
@@ -30,7 +31,6 @@ export function ResponseTimeChart({ messages }: ResponseTimeChartProps) {
   return (
     <div className="chart-with-toolbar">
       <div className="chart-toolbar split">
-        <span>{t('response.caption')}</span>
         <label>
           <span>{t('response.groupBy')}</span>
           <select value={dimension} onChange={(event) => setDimension(event.target.value as ResponseDimension)}>
@@ -41,6 +41,7 @@ export function ResponseTimeChart({ messages }: ResponseTimeChartProps) {
           </select>
         </label>
       </div>
+      <p className="chart-description">{t('response.caption')}</p>
       {result.totalResponses === 0 ? (
         <EmptyState message={t('response.empty')} />
       ) : (
@@ -59,7 +60,7 @@ export function ResponseTimeChart({ messages }: ResponseTimeChartProps) {
                 const name = first?.name ?? result.categories[index]
                 const median = result.values[index] || 0
                 const count = result.counts[index] || 0
-                return `<strong>${escapeHtml(name)}</strong><br/>${t('response.medianResponse')}: ${formatMinutes(median)}<br/>${t('response.responses')}: ${getNumberFormatter(locale).format(count)}`
+                return `<strong>${escapeHtml(name)}</strong><br/>${t('response.medianResponse')}: ${formatMinutes(median, locale)}<br/>${t('response.responses')}: ${getNumberFormatter(locale).format(count)}`
               }
             },
             legend: { show: false },
@@ -78,7 +79,7 @@ export function ResponseTimeChart({ messages }: ResponseTimeChartProps) {
               type: 'value',
               name: t('response.yAxis'),
               ...valueAxisTheme,
-              axisLabel: { ...valueAxisTheme.axisLabel, formatter: (value: number) => formatMinutes(value) }
+              axisLabel: { ...valueAxisTheme.axisLabel, formatter: (value: number) => formatMinutes(value, locale) }
             },
             dataZoom:
               result.categories.length > 16

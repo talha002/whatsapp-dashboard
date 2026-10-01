@@ -86,10 +86,10 @@ export function WordListsSection() {
         <div className="chart-toolbar split">
           <div className="segmented">
             <button type="button" className={language === 'tr' ? 'active' : ''} onClick={() => setLanguage('tr')}>
-              TR
+              {t('lang.turkish')}
             </button>
             <button type="button" className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>
-              EN
+              {t('lang.english')}
             </button>
           </div>
           <button type="button" className="icon-button wide" onClick={() => resetStopwords(language)}>
@@ -131,7 +131,7 @@ export function WordListsSection() {
         <div className="card-head">
           <div>
             <h2>{t('wordlists.banwordsTitle')}</h2>
-            <p>{t('wordlists.banwordsSubtitle', { count: banWords.length })}</p>
+            <p>{t('wordlists.banwordsSubtitle')}</p>
           </div>
         </div>
         <div className="form-grid">
