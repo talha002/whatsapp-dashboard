@@ -10,6 +10,7 @@ export default {
   "app.eyebrow": "WhatsApp-Chats auswerten",
   "app.tagline": "Gespräche und Texte analysieren",
   "app.overall": "Gesamt: {range} • {participants}",
+  "app.moreParticipants": "+{count} weitere",
   "app.noParsedYears": "Keine Jahresangaben erkannt",
   "app.sources": "Quellen:",
   "app.footerParsed": "{messages} Nachrichten • {systemEvents} Systemereignisse • {continuationLines} Fortsetzungszeilen • {placeholders} Platzhalter",

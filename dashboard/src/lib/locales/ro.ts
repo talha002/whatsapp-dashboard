@@ -10,6 +10,7 @@ export default {
   "app.eyebrow": "Statistici pentru conversațiile WhatsApp",
   "app.tagline": "Explorează conversațiile și cuvintele folosite",
   "app.overall": "Total: {range} • {participants}",
+  "app.moreParticipants": "+{count} în plus",
   "app.noParsedYears": "Nu s-au identificat ani",
   "app.sources": "Surse:",
   "app.footerParsed": "{messages} mesaje • {systemEvents} evenimente de sistem • {continuationLines} rânduri de continuare • {placeholders} conținuturi omise",

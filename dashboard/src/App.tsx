@@ -33,7 +33,7 @@ import { DocumentsSection } from './components/DocumentsSection'
 import { WordListsSection } from './components/WordListsSection'
 import { getDashboardStopwordSet, useWordListVersion } from './lib/wordlists'
 import { listDocuments, mergeChatData, useDocumentsVersion } from './lib/documents'
-import { getNumberFormatter, useLocale, useT } from './lib/i18n'
+import { formatParticipantList, getNumberFormatter, useLocale, useT } from './lib/i18n'
 import { LanguageSwitcher } from './components/LanguageSwitcher'
 
 const dataUrl = import.meta.env.VITE_DATA_URL || '/chat-data.json'
@@ -180,9 +180,9 @@ export default function App() {
         <div>
           <p className="eyebrow">{t('app.eyebrow')}</p>
           <h1>{appTitle}</h1>
-          <p className="context">
+          <p className="context" title={chatData && chatData.meta.participants.length > 3 ? chatData.meta.participants.join(', ') : undefined}>
             {chatData
-              ? t('app.overall', { range: yearRange, participants: chatData.meta.participants.join(', ') })
+              ? t('app.overall', { range: yearRange, participants: formatParticipantList(chatData.meta.participants, locale) })
               : t('app.tagline')}
           </p>
         </div>

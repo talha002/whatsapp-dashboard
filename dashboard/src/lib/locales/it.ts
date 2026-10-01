@@ -10,6 +10,7 @@ export default {
   "app.eyebrow": "Le tue chat WhatsApp in numeri",
   "app.tagline": "Esplora conversazioni e parole",
   "app.overall": "Totale: {range} • {participants}",
+  "app.moreParticipants": "+{count} altri",
   "app.noParsedYears": "Nessun anno rilevato",
   "app.sources": "Fonti:",
   "app.footerParsed": "{messages} messaggi • {systemEvents} eventi di sistema • {continuationLines} righe di continuazione • {placeholders} contenuti omessi",

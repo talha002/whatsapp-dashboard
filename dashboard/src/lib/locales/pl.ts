@@ -10,6 +10,7 @@ export default {
   "app.eyebrow": "Statystyki rozmów WhatsApp",
   "app.tagline": "Poznaj swoje rozmowy i używane słowa",
   "app.overall": "Łącznie: {range} • {participants}",
+  "app.moreParticipants": "+{count} więcej",
   "app.noParsedYears": "Nie rozpoznano lat",
   "app.sources": "Źródła:",
   "app.footerParsed": "{messages} wiadomości • {systemEvents} zdarzeń systemowych • {continuationLines} wierszy kontynuacji • {placeholders} pominiętych treści",

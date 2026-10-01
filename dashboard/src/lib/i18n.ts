@@ -28,6 +28,7 @@ const en = {
   'app.eyebrow': 'WhatsApp chat analytics',
   'app.tagline': 'Chat analytics & text analysis platform',
   'app.overall': 'Overall: {range} • {participants}',
+  'app.moreParticipants': '+{count} more',
   'app.noParsedYears': 'No parsed years',
   'app.sources': 'Sources:',
   'app.footerParsed':
@@ -211,6 +212,7 @@ const tr: Record<keyof typeof en, string> = {
   'app.eyebrow': 'WhatsApp sohbet analitiği',
   'app.tagline': 'Sohbet analitiği ve metin analizi platformu',
   'app.overall': 'Genel: {range} • {participants}',
+  'app.moreParticipants': '+{count} kişi daha',
   'app.noParsedYears': 'Ayrıştırılmış yıl yok',
   'app.sources': 'Kaynaklar:',
   'app.footerParsed':
@@ -405,6 +407,12 @@ export function translate(locale: Locale, key: string, vars?: Record<string, str
     }
   }
   return template
+}
+
+export function formatParticipantList(participants: string[], locale: Locale): string {
+  if (participants.length <= 3) return participants.join(', ')
+  const shown = participants.slice(0, 3).join(', ')
+  return `${shown} ${translate(locale, 'app.moreParticipants', { count: participants.length - 3 })}`
 }
 
 function readStoredLocale(): string | null {
