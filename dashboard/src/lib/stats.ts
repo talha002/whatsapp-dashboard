@@ -34,8 +34,17 @@ export const MONTH_FULL_LABELS = [
 
 const monthFormatter = new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' })
 
+export const MAX_MONTH_BUCKETS = 600
+
 function pad(value: number) {
   return String(value).padStart(2, '0')
+}
+
+function monthDate(year: number, month: number) {
+  const date = new Date(0)
+  date.setUTCFullYear(year, month - 1, 1)
+  date.setUTCHours(0, 0, 0, 0)
+  return date
 }
 
 function daysInMonth(year: number, month: number) {
@@ -192,14 +201,14 @@ export function resolveGranularity(filters: Filters, requested: Granularity | 'a
   return filters.year === ALL_YEARS ? 'month' : 'day'
 }
 
-function buildBuckets(data: ChatData, filters: Filters, granularity: Granularity) {
-  if (granularity !== 'month') return buildBuckets(data, filters, 'month')
+function buildBuckets(data: ChatData, filters: Filters, granularity: Granularity, messages: TokenizedMessage[]) {
+  if (granularity !== 'month') return buildBuckets(data, filters, 'month', messages)
 
   const buckets: Array<{ key: string; label: string }> = []
   const addMonthBucket = (year: number, month: number) => {
     buckets.push({
       key: monthKey(year, month),
-      label: monthFormatter.format(new Date(Date.UTC(year, month - 1, 1)))
+      label: monthFormatter.format(monthDate(year, month))
     })
   }
 
@@ -212,6 +221,18 @@ function buildBuckets(data: ChatData, filters: Filters, granularity: Granularity
     let month = start.getUTCMonth() + 1
     const endYear = end.getUTCFullYear()
     const endMonth = end.getUTCMonth() + 1
+    const totalMonths = (endYear - year) * 12 + (endMonth - month) + 1
+
+    if (totalMonths > MAX_MONTH_BUCKETS) {
+      const seen = new Map<number, { year: number; month: number }>()
+      for (const message of messages) {
+        const key = message.year * 100 + message.month
+        if (!seen.has(key)) seen.set(key, { year: message.year, month: message.month })
+      }
+      const sparse = [...seen.values()].sort((a, b) => a.year - b.year || a.month - b.month)
+      for (const entry of sparse) addMonthBucket(entry.year, entry.month)
+      return buckets
+    }
 
     while (year < endYear || (year === endYear && month <= endMonth)) {
       addMonthBucket(year, month)
@@ -249,7 +270,7 @@ export function activitySeries(
   metric: ActivityMetric
 ): CategorySeries {
   const granularity: Granularity = 'month'
-  const buckets = buildBuckets(data, filters, granularity)
+  const buckets = buildBuckets(data, filters, granularity, messages)
   const bucketIndex = new Map(buckets.map((bucket, index) => [bucket.key, index]))
   const participants = selectedParticipants(data, filters)
   const series = participants.map((name) => ({ name, data: buckets.map(() => 0) }))

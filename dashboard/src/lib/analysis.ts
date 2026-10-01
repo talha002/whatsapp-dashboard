@@ -41,11 +41,15 @@ const EMOJI_RE = /\p{Extended_Pictographic}/gu
 
 function monthKey(timestamp: number) {
   const date = new Date(timestamp)
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`
+  return `${String(date.getUTCFullYear()).padStart(4, '0')}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`
 }
 
 function monthLabel(key: string) {
-  return monthFormatter.format(new Date(`${key}-01T00:00:00Z`))
+  const [year, month] = key.split('-').map(Number)
+  const date = new Date(0)
+  date.setUTCFullYear(year, month - 1, 1)
+  date.setUTCHours(0, 0, 0, 0)
+  return monthFormatter.format(date)
 }
 
 function median(values: number[]) {

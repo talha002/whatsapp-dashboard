@@ -4,3 +4,7 @@ dashboard/dist/
 dashboard/.env
 dashboard/public/chat-data.json
 *.log
+security-audit/
+dashboard/scripts/audit-*.mjs
+dashboard/scripts/deep-audit-*.mjs
+dashboard/scripts/lab/

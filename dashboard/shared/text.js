@@ -1,6 +1,6 @@
 const BIDI_RE = /[\u200e\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g
 const URL_RE = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi
-const TAG_RE = /<[^>]+>/g
+const TAG_RE = /<[^<>]*>/g
 const TOKEN_RE = /[\p{L}]+/gu
 
 export const TURKISH_STOPWORDS = [

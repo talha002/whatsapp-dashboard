@@ -3,6 +3,7 @@ import { parseChatText } from '../../shared/parser.js'
 import type { ChatData, ChatMessage, ChatMeta, Language, StoredDocument } from '../types'
 
 const DOCUMENTS_KEY = 'wp:documents'
+const MAX_CONTENT_CHARS = 25 * 1024 * 1024
 
 const listeners = new Set<() => void>()
 let version = 0
@@ -61,6 +62,9 @@ interface SaveDocumentInput {
 }
 
 export function saveDocument(input: SaveDocumentInput): StoredDocument {
+  if (input.content.length > MAX_CONTENT_CHARS) {
+    throw new Error('Document is too large (25 MB maximum).')
+  }
   const document: StoredDocument = {
     id: crypto.randomUUID(),
     title: input.title,

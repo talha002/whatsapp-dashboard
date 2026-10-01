@@ -4,6 +4,7 @@ import { deleteDocument, listDocuments, saveDocument } from '../lib/documents'
 import { EmptyState } from './EmptyState'
 
 const dateFormatter = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' })
+const MAX_FILE_BYTES = 25 * 1024 * 1024
 
 interface DocumentsSectionProps {
   selectedId: string | null
@@ -20,6 +21,10 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return
+    if (file.size > MAX_FILE_BYTES) {
+      setError('The selected file is too large (25 MB maximum).')
+      return
+    }
     try {
       const text = await file.text()
       sourceRef.current = 'file'

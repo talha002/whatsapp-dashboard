@@ -17,7 +17,7 @@ ENV PORT=8080
 ENV STATIC_DIR=/app/dist
 WORKDIR /app
 COPY --from=build /app/dashboard/dist ./dist
-COPY dashboard/scripts ./scripts
+COPY dashboard/scripts/serve.mjs ./scripts/serve.mjs
 USER node
 EXPOSE 8080
 CMD ["node", "scripts/serve.mjs"]
