@@ -186,6 +186,21 @@ export function resolveGranularity(filters: Filters, requested: Granularity | 'a
 }
 
 function buildBuckets(data: ChatData, filters: Filters, granularity: Granularity, messages: TokenizedMessage[], locale: Locale = 'en') {
+  if (granularity === 'day' && filters.year !== ALL_YEARS && filters.month !== ALL_MONTHS) {
+    const year = filters.year
+    const month = filters.month
+    const formatter = new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-US', {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC'
+    })
+    return Array.from({ length: daysInMonth(year, month) }, (_, index) => {
+      const day = index + 1
+      const date = monthDate(year, month)
+      date.setUTCDate(day)
+      return { key: dayKey(year, month, day), label: formatter.format(date) }
+    })
+  }
   if (granularity !== 'month') return buildBuckets(data, filters, 'month', messages, locale)
 
   const buckets: Array<{ key: string; label: string }> = []
@@ -254,7 +269,7 @@ export function activitySeries(
   metric: ActivityMetric,
   locale: Locale = 'en'
 ): CategorySeries {
-  const granularity: Granularity = 'month'
+  const granularity: Granularity = filters.year !== ALL_YEARS && filters.month !== ALL_MONTHS ? 'day' : 'month'
   const buckets = buildBuckets(data, filters, granularity, messages, locale)
   const bucketIndex = new Map(buckets.map((bucket, index) => [bucket.key, index]))
   const participants = selectedParticipants(data, filters)
