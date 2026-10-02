@@ -83,6 +83,8 @@ export default {
   "docs.errorEmpty": "Collez un texte ou choisissez un fichier .txt avant d’enregistrer.",
   "docs.errorSaveFailed": "Impossible d’enregistrer le document.",
   "docs.untitled": "Document sans titre",
+  "docs.detecting": "Détection de la langue…",
+  "docs.detectInconclusive": "La langue n’a pas pu être détectée avec certitude. Vérifiez la sélection.",
   "wordlists.stopwordsTitle": "Mots courants à ignorer",
   "wordlists.stopwordsSubtitle": "Écartez les mots courants pour faire ressortir le contenu de la conversation. {count} mots exclus pour {language}.",
   "wordlists.turkish": "Turc",

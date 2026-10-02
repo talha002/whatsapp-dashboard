@@ -83,6 +83,8 @@ export default {
   "docs.errorEmpty": "Cole um texto ou escolha um ficheiro .txt antes de guardar.",
   "docs.errorSaveFailed": "Não foi possível guardar o documento.",
   "docs.untitled": "Documento sem título",
+  "docs.detecting": "Detectando o idioma…",
+  "docs.detectInconclusive": "Não foi possível detectar o idioma com confiança. Verifique a seleção.",
   "wordlists.stopwordsTitle": "Palavras comuns a ignorar",
   "wordlists.stopwordsSubtitle": "Retire palavras pouco informativas para destacar o conteúdo da conversa. {count} palavras excluídas para {language}.",
   "wordlists.turkish": "Turco",

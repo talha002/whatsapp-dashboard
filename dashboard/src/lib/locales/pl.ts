@@ -83,6 +83,8 @@ export default {
   "docs.errorEmpty": "Przed zapisaniem wklej tekst lub wybierz plik .txt.",
   "docs.errorSaveFailed": "Nie udało się zapisać dokumentu.",
   "docs.untitled": "Dokument bez tytułu",
+  "docs.detecting": "Wykrywanie języka…",
+  "docs.detectInconclusive": "Nie udało się jednoznacznie wykryć języka. Sprawdź wybraną opcję.",
   "wordlists.stopwordsTitle": "Pomijane słowa pospolite",
   "wordlists.stopwordsSubtitle": "Pomiń słowa wnoszące niewiele treści, by lepiej zobaczyć tematy rozmowy. Pominięte słowa: {count}. Język: {language}.",
   "wordlists.turkish": "Turecki",

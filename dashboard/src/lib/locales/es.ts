@@ -83,6 +83,8 @@ export default {
   "docs.errorEmpty": "Pega un texto o selecciona un archivo .txt antes de guardar.",
   "docs.errorSaveFailed": "No se ha podido guardar el documento.",
   "docs.untitled": "Documento sin título",
+  "docs.detecting": "Detectando idioma…",
+  "docs.detectInconclusive": "No se pudo detectar el idioma con seguridad. Revisa la selección.",
   "wordlists.stopwordsTitle": "Palabras comunes que se omiten",
   "wordlists.stopwordsSubtitle": "Quita las palabras de relleno para que destaque el contenido del chat. Se excluyen {count} palabras en {language}.",
   "wordlists.turkish": "Turco",

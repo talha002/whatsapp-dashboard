@@ -83,6 +83,8 @@ export default {
   "docs.errorEmpty": "Incolla un testo o scegli un file .txt prima di salvare.",
   "docs.errorSaveFailed": "Impossibile salvare il documento.",
   "docs.untitled": "Documento senza titolo",
+  "docs.detecting": "Rilevamento della lingua…",
+  "docs.detectInconclusive": "Impossibile rilevare la lingua con certezza. Controlla la selezione.",
   "wordlists.stopwordsTitle": "Parole comuni da ignorare",
   "wordlists.stopwordsSubtitle": "Escludi le parole poco significative per far emergere il contenuto della chat. {count} parole escluse per {language}.",
   "wordlists.turkish": "Turco",

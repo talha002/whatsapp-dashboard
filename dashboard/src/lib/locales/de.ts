@@ -83,6 +83,8 @@ export default {
   "docs.errorEmpty": "Füge Text ein oder wähle vor dem Speichern eine .txt-Datei.",
   "docs.errorSaveFailed": "Das Dokument konnte nicht gespeichert werden.",
   "docs.untitled": "Unbenanntes Dokument",
+  "docs.detecting": "Sprache wird erkannt…",
+  "docs.detectInconclusive": "Die Sprache konnte nicht eindeutig erkannt werden. Bitte prüfe die Auswahl.",
   "wordlists.stopwordsTitle": "Häufige Wörter ausblenden",
   "wordlists.stopwordsSubtitle": "Blende wenig aussagekräftige Wörter aus, damit die Inhalte deutlicher werden. {count} Wörter für {language} ausgeschlossen.",
   "wordlists.turkish": "Türkisch",

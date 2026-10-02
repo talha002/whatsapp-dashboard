@@ -83,6 +83,8 @@ export default {
   "docs.errorEmpty": "Lipește un text sau alege un fișier .txt înainte de salvare.",
   "docs.errorSaveFailed": "Documentul nu a putut fi salvat.",
   "docs.untitled": "Document fără titlu",
+  "docs.detecting": "Se detectează limba…",
+  "docs.detectInconclusive": "Limba nu a putut fi detectată cu certitudine. Verificați selecția.",
   "wordlists.stopwordsTitle": "Cuvinte comune de ignorat",
   "wordlists.stopwordsSubtitle": "Exclude cuvintele care adaugă puțin sens, ca să scoți în evidență subiectele conversației. Cuvinte excluse: {count}. Limba: {language}.",
   "wordlists.turkish": "Turcă",

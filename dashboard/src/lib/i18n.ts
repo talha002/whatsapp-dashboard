@@ -109,6 +109,8 @@ const en = {
   'docs.errorEmpty': 'Paste text or choose a .txt file before saving.',
   'docs.errorSaveFailed': 'Document could not be saved.',
   'docs.untitled': 'Untitled document',
+  'docs.detecting': 'Detecting language…',
+  'docs.detectInconclusive': 'Could not detect the language confidently. Please check the selection.',
 
   'wordlists.stopwordsTitle': "Common Words to Ignore",
   'wordlists.stopwordsSubtitle': "Which everyday words add little meaning? Leave them out of word counts and charts to highlight the conversation. {count} words excluded for {language}.",
@@ -293,6 +295,8 @@ const tr: Record<keyof typeof en, string> = {
   'docs.errorEmpty': 'Kaydetmeden önce metin yapıştırın veya bir .txt dosyası seçin.',
   'docs.errorSaveFailed': 'Belge kaydedilemedi.',
   'docs.untitled': 'Adsız belge',
+  'docs.detecting': 'Dil algılanıyor…',
+  'docs.detectInconclusive': 'Dil güvenilir şekilde algılanamadı. Lütfen seçimi kontrol edin.',
 
   'wordlists.stopwordsTitle': "Yaygın Kelimeleri Ele",
   'wordlists.stopwordsSubtitle': "Asıl konuşulanlar daha belirgin olsun: sık geçen ama tek başına pek anlam taşımayan kelimeleri kelime hesaplarından çıkarın. {language} için {count} kelime eleniyor.",

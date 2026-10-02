@@ -1,8 +1,9 @@
-import { languages, languageCodes } from '../lib/languages'
-import { useRef, useState } from 'react'
+import { isLanguage, languages, languageCodes } from '../lib/languages'
+import { useEffect, useRef, useState } from 'react'
 import type { Language, StoredDocument } from '../types'
 import { deleteDocument, listDocuments, saveDocument } from '../lib/documents'
 import { getDateTimeFormatter, useLocale, useT } from '../lib/i18n'
+import { detectChatLanguage } from '../../shared/langdetect.js'
 import { EmptyState } from './EmptyState'
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024
@@ -21,7 +22,30 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
   const [language, setLanguage] = useState<Language>(locale)
   const [content, setContent] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [detecting, setDetecting] = useState(false)
+  const [detectHint, setDetectHint] = useState(false)
   const sourceRef = useRef<'paste' | 'file'>('paste')
+  const languageTouchedRef = useRef(false)
+
+  useEffect(() => {
+    languageTouchedRef.current = false
+    setDetectHint(false)
+    if (!content.trim()) {
+      setDetecting(false)
+      return
+    }
+    setDetecting(true)
+    const timer = setTimeout(() => {
+      const result = detectChatLanguage(content)
+      setDetecting(false)
+      if (isLanguage(result.language)) {
+        if (!languageTouchedRef.current) setLanguage(result.language)
+      } else {
+        setDetectHint(true)
+      }
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [content])
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return
@@ -88,14 +112,24 @@ export function DocumentsSection({ selectedId, onSelect }: DocumentsSectionProps
             />
           </label>
           <label className="filter-field">
-            <span>{t('docs.languageField')}</span>
-            <select value={language} onChange={(event) => setLanguage(event.target.value as Language)}>
-              {languageCodes.map(code => <option key={code} value={code} lang={code}>{languages[code]} ({code.toUpperCase()})</option>)}
-            </select>
-          </label>
-          <label className="filter-field">
             <span>{t('docs.fileField')}</span>
             <input type="file" accept=".txt,text/plain" onChange={(event) => void handleFile(event.target.files?.[0])} />
+          </label>
+          <label className="filter-field">
+            <span>{t('docs.languageField')}</span>
+            <div className="language-row">
+              <select
+                value={language}
+                onChange={(event) => {
+                  languageTouchedRef.current = true
+                  setLanguage(event.target.value as Language)
+                }}
+              >
+                {languageCodes.map(code => <option key={code} value={code} lang={code}>{languages[code]} ({code.toUpperCase()})</option>)}
+              </select>
+              {detecting && <span className="spinner" role="status" aria-label={t('docs.detecting')} />}
+            </div>
+            {detectHint && !detecting && <p className="detect-hint">{t('docs.detectInconclusive')}</p>}
           </label>
           <label className="filter-field">
             <span>{t('docs.contentField')}</span>
